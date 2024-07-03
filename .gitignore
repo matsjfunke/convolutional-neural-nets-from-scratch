@@ -1,2 +1,4 @@
 /target
 env
+.DS_store
+cifar-10-batches-py/
