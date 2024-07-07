@@ -18,5 +18,5 @@ the above plot is generated with [cifar_visualization.py](cifar_visualization.py
 [keras_predict_cifar.py](keras_predict_cifar.py)
 
 - takes in a normal image and predicts it using the prior trained model
-  ![prediction input](images/skydive-airplanskydive-airplanee.png)
+  ![prediction input](images/skydive-plane.png)
   ![model prediction](images/cifar_pred.png)
