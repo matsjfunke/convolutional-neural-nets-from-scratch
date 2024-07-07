@@ -4,8 +4,6 @@ matsjfunke
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import convolve
-
-
 def fold_arrays():
     """
     convoluting arrays a & b -> resulting in them smoothing
