@@ -11,9 +11,9 @@ from tensorflow.keras.preprocessing import image
 model = load_model("cifar10_cnn_model.h5")
 
 # Load and preprocess the input image
-img_path = "images/cafe-dog.png"  # Replace with the path to your image
-img_label = "dog"
-img = image.load_img(img_path, target_size=(32, 32))
+# input_img = ["images/cafe-dog.png", "dog"]  # Replace with the path to your image & label
+input_img = ["images/skydive-plane.png", "airplane"]
+img = image.load_img(input_img[0], target_size=(32, 32))
 
 # Convert image to numpy array and preprocess
 img_array = image.img_to_array(img)
@@ -40,8 +40,8 @@ label_names = [
 predicted_label = label_names[predicted_class]
 
 # Plot the image pixels
-plt.figure(figsize=(10, 10))
+plt.figure(figsize=(10, 8))
 plt.imshow(img)
 plt.axis("off")
-plt.title(f"Image abeled as {img_label}, predicted: {predicted_label}")
+plt.title(f"Image labeled as {input_img[1]}, predicted: {predicted_label}")
 plt.show()
