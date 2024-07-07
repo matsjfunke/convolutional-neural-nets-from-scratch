@@ -10,8 +10,6 @@ import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
-from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
-from keras.models import Sequential
 
 
 def unpickle(file):
@@ -49,7 +47,8 @@ def load_cifar10(path):
     return train_images, train_labels, test_images, test_labels, label_names
 
 
-def plot_cifar_images(indices):
+def plot_cifar_images():
+    indices = [19, 1, 28, 4, 13, 7, 8, 9, 49, 56]
     # Create a figure
     plt.figure(figsize=(15, 6))  # Adjust the size as needed
 
@@ -76,19 +75,5 @@ if __name__ == "__main__":
         f"Set contains: {train_images.shape[0] + test_images.shape[0]} images of {label_names} categories"
     )
 
-    set_size, height, width, color_dimensions = train_images.shape
-    print(
-        f"\nTraining data shape: \ntotal number of training images {set_size}, \nimage pixel height: {height} & width: {width}, \nnumber of color channels {color_dimensions}\n"
-    )
-
-    set_size, height, width, color_dimensions = test_images.shape
-    print(
-        f"\nTesting data shape: \ntotal number of testing images {set_size}, \nimage pixel height: {height} & width: {width}, \nnumber of color channels {color_dimensions}\n"
-    )
-    print(
-        f"Each Image belongs to one of {len(label_names)} Classes labeled as names: {label_names}"
-    )
-
-    # plot image from train_images given index 40
-    indices = [19, 1, 28, 4, 13, 7, 8, 9, 49, 56]
-    plot_cifar_images(indices)
+    # plot image from train_images given index
+    plot_cifar_images()
