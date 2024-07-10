@@ -5,7 +5,7 @@ It consists of 60,000 32x32 color images in 10 different classes, with 6,000 ima
 
 ## CIFAR-10 Categories
 
-![CIFAR Categories](images/cifar-10-labels.png)
+![CIFAR Categories](../images/cifar-10-labels.png)
 the above plot is generated with [cifar_visualization.py](cifar_visualization.py) use this script to understand the dataset structure
 
 # CNN trained on CIFAR-10
@@ -18,5 +18,5 @@ the above plot is generated with [cifar_visualization.py](cifar_visualization.py
 [keras_predict_cifar.py](keras_predict_cifar.py)
 
 - takes in a normal image and predicts it using the prior trained model
-  ![prediction input](images/skydive-plane.png)
-  ![model prediction](images/cifar_pred.png)
+  ![prediction input](../images/skydive-plane.png)
+  ![model prediction](../images/cifar_pred.png)

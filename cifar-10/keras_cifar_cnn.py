@@ -157,7 +157,7 @@ def cnn_for_cifar(train_images, train_labels, test_images, test_labels, epochs=1
 
 if __name__ == "__main__":
     # Set the path to the directory containing the CIFAR-10 batches
-    path = "images/cifar-10-batches-py"
+    path = "../images/cifar-10-batches-py"
 
     # Load CIFAR-10 data
     train_images, train_labels, test_images, test_labels, label_names = load_cifar10(
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     )
 
     # save the models parameters
-    model.save("cifar10_cnn_model.h5")
+    model.save("./cifar10_cnn_model.h5")
 
     # Create a figure with subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))

@@ -8,11 +8,11 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 
 # Load the saved model
-model = load_model("cifar10_cnn_model.h5")
+model = load_model("./cifar10_cnn_model.h5")
 
 # Load and preprocess the input image
 # input_img = ["images/cafe-dog.png", "dog"]  # Replace with the path to your image & label
-input_img = ["images/skydive-plane.png", "airplane"]
+input_img = ["../images/skydive-plane.png", "airplane"]
 img = image.load_img(input_img[0], target_size=(32, 32))
 
 # Convert image to numpy array and preprocess
