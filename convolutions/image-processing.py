@@ -10,7 +10,7 @@ from scipy.ndimage import convolve
 
 def load_img(img_path):
     # Load the image and convert to grayscale
-    img = Image.open(img_path).convert("L")
+    img = Image.open(img_path)
 
     # Get image dimensions
     width, height = img.size
@@ -28,12 +28,12 @@ def convolve_img(img_array, kernel):
 
     # Display original and convolved images
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-    axes[0].imshow(img_array, cmap="gray")
+    axes[0].imshow(img_array)
     axes[0].set_title("Original Image")
     axes[0].axis("off")
 
-    axes[1].imshow(convolved_img, cmap="gray")
-    axes[1].set_title("Convolved Image")
+    axes[1].imshow(convolved_img)
+    axes[1].set_title("Image Edges")
     axes[1].axis("off")
 
     plt.show()

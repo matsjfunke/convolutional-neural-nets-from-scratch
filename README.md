@@ -1,25 +1,21 @@
-# Convolutional Neural Networks
+# Structure
 
-- **cifar-10/**:
-    - `cifar_visualization.py`: Visualize dataset.
-    - `keras_cifar_cnn.py`: Train the model.
-    - `keras_predict_cifar.py`: Predict using the model.
+- **cifar-10**:
 
-- **convolution/**:
-    - `README.md` notes on Convolution, Kernels, Tensors
-    - `convolutions.py` applied & visualized convolutions
+  - `cifar_visualization.py`: Visualize dataset.
+  - `keras_cifar_cnn.py`: Train the model.
+  - `keras_predict_cifar.py`: Predict using the model.
+
+- **convolutions**:
+
+  - `README.md` notes on Convolution, Kernels, Tensors
+  - `convolutions.py` applied & visualized convolutions
 
 - **requirements.txt**: Dependencies.
 
 ## Usage
 
 1. **Clone the repository**:
-
-   ```bash
-   git clone <repository-url>
-   cd convolutional-neural-net
-   ```
-
 2. **Install dependencies**:
 
    ```bash
@@ -33,6 +29,7 @@
    # or
    cd convolution
    ```
+
 4. **run scripts**
 
    ```bash

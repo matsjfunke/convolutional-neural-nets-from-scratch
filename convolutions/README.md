@@ -69,3 +69,6 @@
 5. **Kernel Usecases**:
 - Kernels are widely used in signal processing tasks such as image processing (e.g., blurring, sharpening), noise reduction, feature extraction, and edge detection.
 - They are also used in numerical methods to solve differential equations and in machine learning algorithms (i.e. CNNs).
+
+Image-processing examples:
+![gray-scale edge detection](../images/gray-scale-edge-detection.png)
