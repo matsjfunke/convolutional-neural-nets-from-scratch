@@ -87,13 +87,19 @@
 
 convolution-visualisation
 
-![convolution-visualisation](../images/img-conv.gif)
+![visualisation](../images/img-conv.gif)
+
 edge-detection
-![edge detection](../images/edge-detection.png)
+
+<img src="../images/edge-detection.png" alt="edge detection" style="width: 50%;" />
+
 gaussian smoothing
-![edge detection](../images/gaussian-conv.png)
+
+<img src="../images/gaussian-conv.png" alt="gaussian smoothing" style="width: 50%;" />
+
 brightening / darkening
+
 <div style="display: flex; justify-content: space-around;">
-  <img src="../images/bright-conv.png" alt="Image 1" width="45%" />
-  <img src="../images/dark-conv.png" alt="Image 2" width="45%" />
+  <img src="../images/bright-conv.png" alt="Image 1" style="width: 45%;" />
+  <img src="../images/dark-conv.png" alt="Image 2" style="width: 45%;" />
 </div>
