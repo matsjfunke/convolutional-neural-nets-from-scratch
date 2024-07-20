@@ -83,6 +83,18 @@ def edge_detection(img_array):
     plot_img_convolution(img_array, convolved_img)
 
 
+def horizontal_edge_detection(img_array):
+    sobel_horizontal_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
+    convolved_img = convolve_img(img_array, sobel_horizontal_kernel)
+    plot_img_convolution(img_array, convolved_img)
+
+
+def vertical_edge_detection(img_array):
+    sobel_vertical_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    convolved_img = convolve_img(img_array, sobel_vertical_kernel)
+    plot_img_convolution(img_array, convolved_img)
+
+
 def img_blurring(img_array):
     # kernel for blurring
     gaussian_kernel = np.array(
@@ -121,12 +133,17 @@ def brighten_darken(img_array, opt="dark"):
     else:
         print("invalid parameter for option, use 'dark' or 'bright'")
 
+
 if __name__ == "__main__":
     img_path = "images/cafe-dog.png"
     # img_path = "images/skydive-plane.png"
     img_array = load_img(img_path)
 
     edge_detection(img_array)
+
+    vertical_edge_detection(img_array)
+
+    horizontal_edge_detection(img_array)
 
     img_blurring(img_array)
 

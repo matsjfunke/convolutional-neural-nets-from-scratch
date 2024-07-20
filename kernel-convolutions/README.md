@@ -91,7 +91,11 @@ convolution-visualisation
 
 edge-detection
 
-<img src="../images/edge-detection.png" alt="edge detection" style="width: 50%;" />
+<div style="display: flex; justify-content: space-around;">
+  <img src="../images/edge-detection.png" alt="edge detection" style="width: 30%;" />
+  <img src="../images/vertical-edge.png" alt="vertical" style="width: 30%;" />
+  <img src="../images/horizontal-edge.png" alt="horizontal" style="width: 30%;" />
+</div>
 
 gaussian smoothing
 
