@@ -76,16 +76,14 @@ def plot_img_convolution(original_img, convolved_img):
     plt.show()
 
 
-if __name__ == "__main__":
-    img_path = "images/cafe-dog.png"
-    # img_path = "images/skydive-plane.png"
-    img_array = load_img(img_path)
-
+def edge_detection(img_array):
     # kernel for edge detection
     edge_kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
-    # convolved_img = convolve_img(img_array, edge_kernel)
-    # plot_img_convolution(img_array, convolved_img)
+    convolved_img = convolve_img(img_array, edge_kernel)
+    plot_img_convolution(img_array, convolved_img)
 
+
+def img_blurring(img_array):
     # kernel for blurring
     gaussian_kernel = np.array(
         [
@@ -106,11 +104,30 @@ if __name__ == "__main__":
             [0.2, 0.2, 0.2, 0.2, 0.2],
         ]
     )
-    # convolved_img = convolve_img(img_array, mean_kernel)
-    # plot_img_convolution(img_array, convolved_img)
-
-    # kernels for brightening /darkening
-    brightening_kernel = np.array([[0, 0, 0], [0, 3, 0], [0, 0, 0]])
-    darkening_kernel = np.array([[0, 0, 0], [0, 0.2, 0], [0, 0, 0]])
-    convolved_img = convolve_img(img_array, darkening_kernel)
+    convolved_img = convolve_img(img_array, mean_kernel)
     plot_img_convolution(img_array, convolved_img)
+
+
+def brighten_darken(img_array, opt="dark"):
+    # kernels for brightening /darkening
+    if opt == "dark":
+        darkening_kernel = np.array([[0, 0, 0], [0, 0.2, 0], [0, 0, 0]])
+        convolved_img = convolve_img(img_array, darkening_kernel)
+        plot_img_convolution(img_array, convolved_img)
+    elif opt == "bright":
+        brightening_kernel = np.array([[0, 0, 0], [0, 3, 0], [0, 0, 0]])
+        convolved_img = convolve_img(img_array, brightening_kernel)
+        plot_img_convolution(img_array, convolved_img)
+    else:
+        print("invalid parameter for option, use 'dark' or 'bright'")
+
+if __name__ == "__main__":
+    img_path = "images/cafe-dog.png"
+    # img_path = "images/skydive-plane.png"
+    img_array = load_img(img_path)
+
+    edge_detection(img_array)
+
+    img_blurring(img_array)
+
+    brighten_darken(img_array, "dark")

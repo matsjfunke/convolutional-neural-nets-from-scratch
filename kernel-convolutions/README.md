@@ -83,15 +83,16 @@
 - Kernels are widely used in signal processing tasks such as image processing (e.g., blurring, sharpening), noise reduction, feature extraction, and edge detection.
 - They are also used in numerical methods to solve differential equations and in machine learning algorithms (i.e. CNNs).
 
-Image-processing examples:
+## Image-processing examples:
+
 convolution-visualisation
+
 ![convolution-visualisation](../images/img-conv.gif)
 edge-detection
 ![edge detection](../images/edge-detection.png)
 gaussian smoothing
 ![edge detection](../images/gaussian-conv.png)
 brightening / darkening
-
 <div style="display: flex; justify-content: space-around;">
   <img src="../images/bright-conv.png" alt="Image 1" width="45%" />
   <img src="../images/dark-conv.png" alt="Image 2" width="45%" />
