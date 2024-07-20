@@ -90,3 +90,9 @@ edge-detection
 ![edge detection](../images/edge-detection.png)
 gaussian smoothing
 ![edge detection](../images/gaussian-conv.png)
+brightening / darkening
+
+<div style="display: flex; justify-content: space-around;">
+  <img src="../images/bright-conv.png" alt="Image 1" width="45%" />
+  <img src="../images/dark-conv.png" alt="Image 2" width="45%" />
+</div>

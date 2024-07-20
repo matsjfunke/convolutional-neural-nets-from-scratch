@@ -109,3 +109,8 @@ if __name__ == "__main__":
     # convolved_img = convolve_img(img_array, mean_kernel)
     # plot_img_convolution(img_array, convolved_img)
 
+    # kernels for brightening /darkening
+    brightening_kernel = np.array([[0, 0, 0], [0, 3, 0], [0, 0, 0]])
+    darkening_kernel = np.array([[0, 0, 0], [0, 0.2, 0], [0, 0, 0]])
+    convolved_img = convolve_img(img_array, darkening_kernel)
+    plot_img_convolution(img_array, convolved_img)
