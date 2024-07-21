@@ -101,6 +101,7 @@ def vertical_edge_detection(img_array, plot=True):
 
 
 def img_blurring(img_array, plot=True, blurrtype="gaussian"):
+    # TODO imrprove this shit function
     if blurrtype == "gaussian":
         gaussian_kernel = np.array(
             [
@@ -152,6 +153,28 @@ def brighten_darken(img_array, plot=True, mode="dark"):
         print("invalid parameter for option, use 'dark' or 'bright'")
 
 
+def pool_img(img_array, plot=True, pool_size=(2, 2), pool_type="max"):
+    height, width, channels = img_array.shape
+    pooled_height = height // pool_size[0]
+    pooled_width = width // pool_size[1]
+    pooled_img = np.zeros((pooled_height, pooled_width, channels))
+
+    for y in range(pooled_height):
+        for x in range(pooled_width):
+            for c in range(channels):
+                region = img_array[y * pool_size[0] : (y + 1) * pool_size[0], x * pool_size[1] : (x + 1) * pool_size[1], c]
+                if pool_type == "max":
+                    pooled_img[y, x, c] = np.max(region)
+                elif pool_type == "average":
+                    pooled_img[y, x, c] = np.mean(region)
+                else:
+                    raise ValueError("Invalid pool_type. Use 'max' or 'average'.")
+
+    if plot:
+        plot_img_convolution(img_array, pooled_img)
+    return pooled_img
+
+
 if __name__ == "__main__":
     img_path = "images/cafe-dog.png"
     # img_path = "images/skydive-plane.png"
@@ -164,5 +187,8 @@ if __name__ == "__main__":
     horizontal_edge_detection(img_array)
 
     img_blurring(img_array, plot=False, blurrtype="gaussian")
+    # TODO imrprove this shit function
 
     result = brighten_darken(img_array, plot=True, mode="dark")
+
+    pooled_img = pool_img(img_array, plot=True, pool_size=(20, 20), pool_type="max")
