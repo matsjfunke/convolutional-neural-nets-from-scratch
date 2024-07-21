@@ -81,43 +81,53 @@ def edge_detection(img_array):
     edge_kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
     convolved_img = convolve_img(img_array, edge_kernel)
     plot_img_convolution(img_array, convolved_img)
+    return convolved_img
 
 
 def horizontal_edge_detection(img_array):
     sobel_horizontal_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
     convolved_img = convolve_img(img_array, sobel_horizontal_kernel)
     plot_img_convolution(img_array, convolved_img)
+    return convolved_img
 
 
 def vertical_edge_detection(img_array):
     sobel_vertical_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     convolved_img = convolve_img(img_array, sobel_vertical_kernel)
     plot_img_convolution(img_array, convolved_img)
+    return convolved_img
 
 
-def img_blurring(img_array):
-    # kernel for blurring
-    gaussian_kernel = np.array(
-        [
-            [1, 4, 7, 4, 1],
-            [4, 16, 26, 16, 4],
-            [7, 26, 41, 26, 7],
-            [4, 16, 26, 16, 4],
-            [1, 4, 7, 4, 1],
-        ]
-    )
-    gaussian_kernel = gaussian_kernel / np.sum(gaussian_kernel)
-    mean_kernel = np.array(
-        [
-            [0.2, 0.2, 0.2, 0.2, 0.2],
-            [0.2, 0.2, 0.2, 0.2, 0.2],
-            [0.2, 0.2, 0.2, 0.2, 0.2],
-            [0.2, 0.2, 0.2, 0.2, 0.2],
-            [0.2, 0.2, 0.2, 0.2, 0.2],
-        ]
-    )
-    convolved_img = convolve_img(img_array, mean_kernel)
-    plot_img_convolution(img_array, convolved_img)
+def img_blurring(img_array, blurrtype="gaussian"):
+    if blurrtype == "gaussian":
+        gaussian_kernel = np.array(
+            [
+                [1, 4, 7, 4, 1],
+                [4, 16, 26, 16, 4],
+                [7, 26, 41, 26, 7],
+                [4, 16, 26, 16, 4],
+                [1, 4, 7, 4, 1],
+            ]
+        )
+        gaussian_kernel = gaussian_kernel / np.sum(gaussian_kernel)
+        convolved_img = convolve_img(img_array, gaussian_kernel)
+        plot_img_convolution(img_array, convolved_img)
+        return convolved_img
+    elif blurrtype == "mean":
+        mean_kernel = np.array(
+            [
+                [0.2, 0.2, 0.2, 0.2, 0.2],
+                [0.2, 0.2, 0.2, 0.2, 0.2],
+                [0.2, 0.2, 0.2, 0.2, 0.2],
+                [0.2, 0.2, 0.2, 0.2, 0.2],
+                [0.2, 0.2, 0.2, 0.2, 0.2],
+            ]
+        )
+        convolved_img = convolve_img(img_array, mean_kernel)
+        plot_img_convolution(img_array, convolved_img)
+        return convolved_img
+    else:
+        print("blurrtype option doesnt exist")
 
 
 def brighten_darken(img_array, opt="dark"):
@@ -145,6 +155,6 @@ if __name__ == "__main__":
 
     horizontal_edge_detection(img_array)
 
-    img_blurring(img_array)
+    img_blurring(img_array, "gaussian")
 
     brighten_darken(img_array, "dark")
