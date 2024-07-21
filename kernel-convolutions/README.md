@@ -2,7 +2,7 @@
 
 - CNNs rely on convolutional layers, which leverage the operation of convolution to efficiently learn and extract features from input data
 
-# Table of Contents
+# Contents of this README
 
 1. [Overview Convolutional Layers](#overview-convolutional-layers)
    - [First Layer](#first-layer)
@@ -11,7 +11,13 @@
 3. [Convolution](#convolution)
 4. [Kernels](#kernels)
    - [How a Kernel Works](#how-a-kernel-works)
-     - Convolution Operation, Kernel Size and Shape, Smoothing Effect, Sharpening Effect, Kernel Usecases
+     - [Convolution Operation](#convolution-operation)
+     - [Kernel Size and Shape](#kernel-size-and-shape)
+     - [Smoothing Effect](#smoothing-effect)
+     - [Sharpening Effect](#sharpening-effect)
+     - [Kernel Usecases](#kernel-usecases)
+5. [Image-processing examples](#image-processing-examples)
+6. [Pooling](#pooling)
 
 ## Overview Convolutional Layers:
 
@@ -107,3 +113,23 @@ brightening / darkening
   <img src="../images/bright-conv.png" alt="Image 1" style="width: 45%;" />
   <img src="../images/dark-conv.png" alt="Image 2" style="width: 45%;" />
 </div>
+
+## Pooling
+
+In convolutional neural networks (CNNs), pooling is a process that reduces the spatial dimensions of feature maps by summarizing smaller regions into single values.
+Think of it as combining several pixels into larger ones.
+
+**Types:**
+
+- **Max Pooling:** Selects the maximum value from a defined window (e.g., 2x2), capturing the most prominent feature.
+  - Example: For a 2x2 region [1, 3; 2, 4], max pooling would result in 4.
+- **Average Pooling:** Calculates the average value from a defined window, providing a smoother representation.
+  - Example: For a 2x2 region [1, 3; 2, 4], average pooling would result in (1+3+2+4)/4 = 2.5.
+
+**Why use pooling:**
+
+1. Reduces the size of feature maps.
+2. Abstracts features.
+3. Provides spatial invariance.
+
+This makes the computation more efficient and robust to minor input changes.
