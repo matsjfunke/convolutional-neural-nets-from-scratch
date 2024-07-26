@@ -114,6 +114,10 @@ convolution-visualisation
 
 <img src="../images/diagonal-change.png" alt="diagonal edges" style="width: 50%;" />
 
+**combined edges**
+
+<img src="../images/combined-diagonals.png" alt="all in one" style="width: 50%;" />
+
 **gaussian smoothing**
 
 <img src="../images/gaussian-conv.png" alt="gaussian smoothing" style="width: 50%;" />

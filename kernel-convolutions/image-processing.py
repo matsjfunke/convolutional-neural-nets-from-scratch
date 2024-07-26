@@ -100,13 +100,9 @@ def vertical_edge_detection(img_array, plot=True):
 def diagonal_change_detection(img_array, kernel_type="bottom_left_to_top_right", plot=True):
     print("\nDetecting diagonals")
     kernels = {
-        "bottom_left_to_top_right": np.array([[2, 1, 0], 
-                                              [1, 0, -1], 
-                                              [0, -1, -2]]),
-        "top_right_to_bottom_left": np.array([[-2, -1, 0], 
-                                              [-1, 0, 1], 
-                                              [0, 1, 2]]),
-        "bottom_right_to_top_left": np.array([[0, 1, 2], [-1, 0, 1], [-2, -1, 0]]),
+        "bottom_left_top_right": np.array([[2, 1, 0], [1, 0, -1], [0, -1, -2]]),
+        "top_right_bottom_left": np.array([[-2, -1, 0], [-1, 0, 1], [0, 1, 2]]),
+        "bottom_right_top_left": np.array([[0, 1, 2], [-1, 0, 1], [-2, -1, 0]]),
         "top_left_bottom_right": np.array([[0, -1, -2], [1, 0, -1], [2, 1, 0]]),
     }
     if kernel_type not in kernels:
@@ -128,6 +124,21 @@ def edge_detection(img_array, plot=True):
     if plot:
         plot_img_convolution(img_array, convolved_img)
     return convolved_img
+
+
+def combine_img_edges(original_img, convolved_imgs, plot=True):
+    combined_img = np.zeros_like(convolved_imgs[0])
+
+    for img in convolved_imgs:
+        # Add absolute values of the convolved images to the combined image
+        combined_img += np.abs(img)
+
+    # Normalize combined image
+    combined_img = np.clip(combined_img, 0, 1)
+
+    if plot:
+        plot_img_convolution(original_img, combined_img)
+    return combined_img
 
 
 def img_blurring(img_array, plot=True, blur_type="gaussian"):
@@ -211,11 +222,21 @@ if __name__ == "__main__":
     img_path = "images/skydive-plane.png"
     img_array = load_img(img_path)
 
-    vertical_edge_detection(img_array)
+    vertical_edges = vertical_edge_detection(img_array)
 
-    horizontal_edge_detection(img_array)
+    horizontal_edges = horizontal_edge_detection(img_array)
 
-    diagonal_change_detection(img_array, kernel_type="top_right_to_bottom_left", plot=True)
+    convolved_imgs = [vertical_edges, horizontal_edges]
+    combine_img_edges(img_array, convolved_imgs, plot=True)
+
+    diagonal_change_detection(img_array, kernel_type="bottom_left_top_right", plot=True)
+
+    kernels = ["bottom_left_top_right", "top_right_bottom_left", "bottom_right_top_left", "top_left_bottom_right"]
+    convolved_imgs = []
+    for kernel in kernels:
+        convolved_img = diagonal_change_detection(img_array, kernel_type=kernel, plot=False)
+        convolved_imgs.append(convolved_img)
+    combine_img_edges(img_array, convolved_imgs, plot=True)
 
     result = edge_detection(img_array)
 
