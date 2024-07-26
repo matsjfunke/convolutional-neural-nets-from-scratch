@@ -74,7 +74,8 @@
   - purpose: is to smooth out abrupt changes or noise in the input function (`f(x)`).
 - gaussian kernel, applies higher weights to nearby points and lower weights to farther points, creating a smooth transition between values. This helps in reducing sharp spikes or noise in the data.
   - adjustment: changing `sigma` alters the width of the Gaussian curve. Larger `sigma` values result in broader smoothing, smaller retain more detail.
-    ![convolutions.py smoothed piecewise linear function](../images/smooth_function_convolution.png)
+
+<img src="../images/smooth_function_convolution.png" alt="convolutions.py smoothed piecewise linear function" style="width: 50%;" />
 
 4. **Sharpening Effect**:
 
@@ -82,7 +83,8 @@
   - **purpose**: To emphasize the extremes and highlight regions with rapid changes or high frequency content in the input function (`f(x)`).
 - **Laplacian of Gaussian Kernel**: assigns higher weights to points where there are rapid changes in the input function and lower or negative weights to smoother regions, thus highlighting transitions and edges.
   - **Adjustment**: Changing `sigma` alters the sensitivity of the kernel. Smaller `sigma` values more localized edge detection, larger `sigma` values make the kernel sensitive to broader changes.
-    ![convolutions.py magnified piecewise linear function](../images/sharp_function_convolution.png)
+
+<img src="../images/sharp_function_convolution.png" alt="convolutions.py magnified piecewise linear function" style="width: 50%;" />
 
 5. **Kernel Usecases**:
 
@@ -97,10 +99,11 @@ convolution-visualisation
 
 edge-detection
 
+<img src="../images/edge-detection.png" alt="edge detection" style="width: 50%;" />
+
 <div style="display: flex; justify-content: space-around;">
-  <img src="../images/edge-detection.png" alt="edge detection" style="width: 30%;" />
-  <img src="../images/vertical-edge.png" alt="vertical" style="width: 30%;" />
-  <img src="../images/horizontal-edge.png" alt="horizontal" style="width: 30%;" />
+  <img src="../images/vertical-edge.png" alt="vertical" style="width: 45%;" />
+  <img src="../images/horizontal-edge.png" alt="horizontal" style="width: 45%;" />
 </div>
 
 gaussian smoothing
@@ -128,8 +131,10 @@ Think of it as combining several pixels into larger ones.
 
 **Why use pooling:**
 
-1. Reduces the size of feature maps.
-2. Abstracts features.
-3. Provides spatial invariance.
+Makes the computation more efficient and robust to minor input changes by:
 
-This makes the computation more efficient and robust to minor input changes.
+1. reducing the size of feature maps.
+2. abstracting features.
+3. providing spatial invariance.
+
+<img src="../images/pooling.png" alt="pooling example" style="width: 50%;" />
