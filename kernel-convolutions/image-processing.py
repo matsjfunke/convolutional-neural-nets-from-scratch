@@ -1,5 +1,8 @@
 """
 matsjfunke
+
+Positive kernel values make areas appear lighter (white) in the output image.
+Negative kernel values make areas appear darker (black) in the output image.
 """
 
 import matplotlib.image as mpimg
@@ -76,13 +79,6 @@ def plot_img_convolution(original_img, convolved_img):
     plt.show()
 
 
-def edge_detection(img_array, plot=True):
-    print("\ndetecting edges")
-    edge_kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
-    convolved_img = convolve_img(img_array, edge_kernel)
-    if plot:
-        plot_img_convolution(img_array, convolved_img)
-    return convolved_img
 
 
 def horizontal_edge_detection(img_array, plot=True):
@@ -103,6 +99,34 @@ def vertical_edge_detection(img_array, plot=True):
     return convolved_img
 
 
+def diagonal_change_detection(img_array, kernel_type="bottom_left_to_top_right", plot=True):
+    print("\nDetecting diagonals")
+
+    kernels = {
+        "bottom_left_to_top_right": np.array([[2, 1, 0], [1, 0, -1], [0, -1, -2]]),
+        "top_left_to_bottom_right": np.array([[-2, -1, 0], [-1, 0, 1], [0, 1, 2]]),
+        "bottom_right_to_top_left": np.array([[0, 1, 2], [-1, 0, 1], [-2, -1, 0]]),
+        "top_right_to_bottom_left": np.array([[0, -1, -2], [1, 0, -1], [2, 1, 0]]),
+    }
+    if kernel_type not in kernels:
+        raise ValueError(f"Invalid kernel_type '{kernel_type}'. Valid options are: {list(kernels.keys())}")
+    diagonal_kernel = kernels[kernel_type]
+
+    convolved_img = convolve_img(img_array, diagonal_kernel)
+
+    if plot:
+        plot_img_convolution(img_array, convolved_img)
+
+    return convolved_img
+
+
+def edge_detection(img_array, plot=True):
+    print("\ndetecting edges")
+    edge_kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+    convolved_img = convolve_img(img_array, edge_kernel)
+    if plot:
+        plot_img_convolution(img_array, convolved_img)
+    return convolved_img
 def img_blurring(img_array, plot=True, blur_type="gaussian"):
     print("\nblurring the image")
     if blur_type == "gaussian":
@@ -184,11 +208,13 @@ if __name__ == "__main__":
     img_path = "images/skydive-plane.png"
     img_array = load_img(img_path)
 
-    result = edge_detection(img_array)
-
     vertical_edge_detection(img_array)
 
     horizontal_edge_detection(img_array)
+
+    diagonal_change_detection(img_array, kernel_type="top_right_to_bottom_left", plot=True)
+
+    result = edge_detection(img_array)
 
     img_blurring(img_array, plot=True, blur_type="mean")
 
