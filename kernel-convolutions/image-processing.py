@@ -34,7 +34,7 @@ def load_img(img_path):
 
 
 def convolve_img(img_array, kernel):
-    print("\nconvoluting...")
+    print("convoluting...")
     kernel = np.array(kernel)
     kernel_height, kernel_width = kernel.shape
     height, width, channels = img_array.shape
@@ -60,7 +60,7 @@ def convolve_img(img_array, kernel):
 
 
 def plot_img_convolution(original_img, convolved_img):
-    print("\nploting...")
+    print("ploting...")
     # Display original and convolved images
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))
     axes[0].imshow(original_img)
@@ -77,6 +77,7 @@ def plot_img_convolution(original_img, convolved_img):
 
 
 def edge_detection(img_array, plot=True):
+    print("\ndetecting edges")
     edge_kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
     convolved_img = convolve_img(img_array, edge_kernel)
     if plot:
@@ -85,6 +86,7 @@ def edge_detection(img_array, plot=True):
 
 
 def horizontal_edge_detection(img_array, plot=True):
+    print("\ndetecting horizontal edges")
     sobel_horizontal_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
     convolved_img = convolve_img(img_array, sobel_horizontal_kernel)
     if plot:
@@ -93,6 +95,7 @@ def horizontal_edge_detection(img_array, plot=True):
 
 
 def vertical_edge_detection(img_array, plot=True):
+    print("\ndetecting vertical edges")
     sobel_vertical_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     convolved_img = convolve_img(img_array, sobel_vertical_kernel)
     if plot:
@@ -101,6 +104,7 @@ def vertical_edge_detection(img_array, plot=True):
 
 
 def img_blurring(img_array, plot=True, blur_type="gaussian"):
+    print("\nblurring the image")
     if blur_type == "gaussian":
         gaussian_kernel = np.array(
             [
@@ -135,12 +139,14 @@ def img_blurring(img_array, plot=True, blur_type="gaussian"):
 def brighten_darken(img_array, plot=True, mode="dark"):
     # kernels for brightening /darkening
     if mode == "dark":
+        print("darkening")
         darkening_kernel = np.array([[0, 0, 0], [0, 0.2, 0], [0, 0, 0]])
         convolved_img = convolve_img(img_array, darkening_kernel)
         if plot:
             plot_img_convolution(img_array, convolved_img)
         return convolved_img
     elif mode == "bright":
+        print("brightening")
         brightening_kernel = np.array([[0, 0, 0], [0, 3, 0], [0, 0, 0]])
         convolved_img = convolve_img(img_array, brightening_kernel)
         if plot:
@@ -151,6 +157,7 @@ def brighten_darken(img_array, plot=True, mode="dark"):
 
 
 def pool_img(img_array, plot=True, pool_size=(2, 2), pool_type="max"):
+    print("\npooling image")
     height, width, channels = img_array.shape
     pooled_height = height // pool_size[0]
     pooled_width = width // pool_size[1]
@@ -177,7 +184,7 @@ if __name__ == "__main__":
     img_path = "images/skydive-plane.png"
     img_array = load_img(img_path)
 
-    edge_detection(img_array)
+    result = edge_detection(img_array)
 
     vertical_edge_detection(img_array)
 
@@ -187,4 +194,5 @@ if __name__ == "__main__":
 
     brighten_darken(img_array, plot=True, mode="dark")
 
-    pooled_img = pool_img(img_array, plot=True, pool_size=(20, 20), pool_type="max")
+    pool_img(img_array, plot=True, pool_size=(20, 20), pool_type="max")
+    pooled_img = pool_img(result, plot=True, pool_size=(20, 20), pool_type="max")
