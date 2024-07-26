@@ -100,9 +100,8 @@ def vertical_edge_detection(img_array, plot=True):
     return convolved_img
 
 
-def img_blurring(img_array, plot=True, blurrtype="gaussian"):
-    # TODO imrprove this shit function
-    if blurrtype == "gaussian":
+def img_blurring(img_array, plot=True, blur_type="gaussian"):
+    if blur_type == "gaussian":
         gaussian_kernel = np.array(
             [
                 [1, 4, 7, 4, 1],
@@ -112,13 +111,9 @@ def img_blurring(img_array, plot=True, blurrtype="gaussian"):
                 [1, 4, 7, 4, 1],
             ]
         )
-        gaussian_kernel = gaussian_kernel / np.sum(gaussian_kernel)
-        convolved_img = convolve_img(img_array, gaussian_kernel)
-        if plot:
-            plot_img_convolution(img_array, convolved_img)
-        return convolved_img
-    elif blurrtype == "mean":
-        mean_kernel = np.array(
+        kernel = gaussian_kernel / np.sum(gaussian_kernel)
+    elif blur_type == "mean":
+        kernel = np.array(
             [
                 [0.2, 0.2, 0.2, 0.2, 0.2],
                 [0.2, 0.2, 0.2, 0.2, 0.2],
@@ -127,12 +122,14 @@ def img_blurring(img_array, plot=True, blurrtype="gaussian"):
                 [0.2, 0.2, 0.2, 0.2, 0.2],
             ]
         )
-        convolved_img = convolve_img(img_array, mean_kernel)
-        if plot:
-            plot_img_convolution(img_array, convolved_img)
-        return convolved_img
     else:
         print("blurrtype option doesnt exist")
+
+    convolved_img = convolve_img(img_array, kernel)
+    if plot:
+        plot_img_convolution(img_array, convolved_img)
+
+    return convolved_img
 
 
 def brighten_darken(img_array, plot=True, mode="dark"):
@@ -176,8 +173,8 @@ def pool_img(img_array, plot=True, pool_size=(2, 2), pool_type="max"):
 
 
 if __name__ == "__main__":
-    img_path = "images/cafe-dog.png"
-    # img_path = "images/skydive-plane.png"
+    # img_path = "images/cafe-dog.png"
+    img_path = "images/skydive-plane.png"
     img_array = load_img(img_path)
 
     edge_detection(img_array)
@@ -186,9 +183,8 @@ if __name__ == "__main__":
 
     horizontal_edge_detection(img_array)
 
-    img_blurring(img_array, plot=False, blurrtype="gaussian")
-    # TODO imrprove this shit function
+    img_blurring(img_array, plot=True, blur_type="mean")
 
-    result = brighten_darken(img_array, plot=True, mode="dark")
+    brighten_darken(img_array, plot=True, mode="dark")
 
     pooled_img = pool_img(img_array, plot=True, pool_size=(20, 20), pool_type="max")
