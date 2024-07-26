@@ -79,8 +79,6 @@ def plot_img_convolution(original_img, convolved_img):
     plt.show()
 
 
-
-
 def horizontal_edge_detection(img_array, plot=True):
     print("\ndetecting horizontal edges")
     sobel_horizontal_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
@@ -101,12 +99,15 @@ def vertical_edge_detection(img_array, plot=True):
 
 def diagonal_change_detection(img_array, kernel_type="bottom_left_to_top_right", plot=True):
     print("\nDetecting diagonals")
-
     kernels = {
-        "bottom_left_to_top_right": np.array([[2, 1, 0], [1, 0, -1], [0, -1, -2]]),
-        "top_left_to_bottom_right": np.array([[-2, -1, 0], [-1, 0, 1], [0, 1, 2]]),
+        "bottom_left_to_top_right": np.array([[2, 1, 0], 
+                                              [1, 0, -1], 
+                                              [0, -1, -2]]),
+        "top_right_to_bottom_left": np.array([[-2, -1, 0], 
+                                              [-1, 0, 1], 
+                                              [0, 1, 2]]),
         "bottom_right_to_top_left": np.array([[0, 1, 2], [-1, 0, 1], [-2, -1, 0]]),
-        "top_right_to_bottom_left": np.array([[0, -1, -2], [1, 0, -1], [2, 1, 0]]),
+        "top_left_bottom_right": np.array([[0, -1, -2], [1, 0, -1], [2, 1, 0]]),
     }
     if kernel_type not in kernels:
         raise ValueError(f"Invalid kernel_type '{kernel_type}'. Valid options are: {list(kernels.keys())}")
@@ -127,6 +128,8 @@ def edge_detection(img_array, plot=True):
     if plot:
         plot_img_convolution(img_array, convolved_img)
     return convolved_img
+
+
 def img_blurring(img_array, plot=True, blur_type="gaussian"):
     print("\nblurring the image")
     if blur_type == "gaussian":
@@ -221,4 +224,4 @@ if __name__ == "__main__":
     brighten_darken(img_array, plot=True, mode="dark")
 
     pool_img(img_array, plot=True, pool_size=(20, 20), pool_type="max")
-    pooled_img = pool_img(result, plot=True, pool_size=(20, 20), pool_type="max")
+    pool_img(result, plot=True, pool_size=(20, 20), pool_type="max")

@@ -5,17 +5,17 @@
 # Contents of this README
 
 1. [Convolution](#convolution)
-3. [Tensors](#tensors)
-4. [Kernels](#kernels)
-5. [How a Kernel Works](#how-a-kernel-works)
-     - Convolution Operation
-     - Kernel Size and Shape
-     - Smoothing Effect
-     - Sharpening Effect
-     - Pooling
-6. [Kernel Usecases](#kernel-usecases)
-7. [Image-processing examples](#image-processing-examples)
-8. [Chaining Convolutions](#chaining-convolutional-layers)
+2. [Tensors](#tensors)
+3. [Kernels](#kernels)
+4. [How a Kernel Works](#how-a-kernel-works)
+   - Convolution Operation
+   - Kernel Size and Shape
+   - Smoothing Effect
+   - Sharpening Effect
+   - Pooling
+5. [Kernel Usecases](#kernel-usecases)
+6. [Image-processing examples](#image-processing-examples)
+7. [Chaining Convolutions](#chaining-convolutional-layers)
    - First Layer
    - Other Convolutional Layers
 
@@ -30,7 +30,7 @@
 - Tensors can have arbitrary dimensions.
   - Scalars are 0-dimensional tensors (0D), vectors are 1-dimensional tensors (1D), matrices are 2-dimensional tensors (2D), and tensors can extend to higher dimensions (3D, 4D, etc.).
   - An RGB image represented as a 3D tensor with dimensions (height, width, channels)
- 
+
 ## Kernels
 
 - **Kernel** is a small matrix (or function) used for various operations such as convolution, smoothing, filtering, or edge detection.
@@ -83,6 +83,7 @@ Think of it as combining several pixels into larger ones.
 
 **Why use pooling:**
 Makes the computation more efficient and robust to minor input changes by:
+
 1. reducing the size of feature maps.
 2. abstracting features.
 3. providing spatial invariance.
@@ -108,6 +109,10 @@ convolution-visualisation
   <img src="../images/vertical-edge.png" alt="vertical" style="width: 45%;" />
   <img src="../images/horizontal-edge.png" alt="horizontal" style="width: 45%;" />
 </div>
+
+**diagonal edge detection**
+
+<img src="../images/diagonal-change.png" alt="diagonal edges" style="width: 50%;" />
 
 **gaussian smoothing**
 
