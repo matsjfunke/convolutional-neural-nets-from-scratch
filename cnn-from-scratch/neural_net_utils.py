@@ -41,3 +41,18 @@ def max_pooling(feature_map, kernel_size=2, stride=2):
             pooled_feature_map[i, j] = np.max(feature_map[start_i : start_i + kernel_size, start_j : start_j + kernel_size])
 
     return pooled_feature_map
+
+
+def cross_entropy_loss_gradient(true_labels, predicted_probs):
+    """
+    Parameters:
+    - np.ndarray One-hot encoded true labels.
+    - np.ndarray Predicted probabilities from the network.
+
+    Returns:
+    - float: Cross-entropy loss.
+    - np.ndarray: Gradient of the loss with respect to the predicted probabilities.
+    """
+    loss = -np.sum(true_labels * np.log(predicted_probs))
+    grad = predicted_probs - true_labels
+    return loss, grad

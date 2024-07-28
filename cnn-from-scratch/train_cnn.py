@@ -4,7 +4,7 @@ matsjfunke
 
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
-from neural_net_utils import init_weights_biases, max_pooling, relu, softmax
+from neural_net_utils import cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, softmax
 from scipy.signal import convolve2d
 
 
@@ -59,6 +59,17 @@ def forward_pass(input_img, num_kernels, kernel_size, hidden_layer_sizes, num_cl
     return probabilities
 
 
+def back_prop(probabilities):
+    true_label = np.zeros(len(label_names))
+    true_label[train_labels[0]] = 1
+
+    # Compute the loss and its gradient
+    loss, loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
+    print(f"actual label: {label_names[train_labels[0]]}")
+    print(f"Cross-Entropy Loss: {loss}")
+    print(f"Loss Gradient: {loss_grad}")
+
+
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
 
@@ -69,12 +80,6 @@ if __name__ == "__main__":
     test_images_gray = rgb2gray_weighted(test_images)
 
     probabilities = forward_pass(train_images_gray[0], num_kernels=2, kernel_size=3, hidden_layer_sizes=[128, 8], num_classes=len(label_names))
+    print(f"The predicted class is: {label_names[np.argmax(probabilities)]}")
 
-    print(np.sum(probabilities), "This should be close to 1 due to softmax")
-
-    # Determine the index of the highest probability
-    predicted_index = np.argmax(probabilities)
-    # Get the corresponding class label
-    predicted_class = label_names[predicted_index]
-    print(f"The predicted class is: {predicted_class}")
-    print(f"The predicted class probability is: {probabilities[predicted_index]:.6f}")
+    back_prop(probabilities)
