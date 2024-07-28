@@ -48,6 +48,17 @@ def softmax_output_layer(hidden_layer_output, num_classes):
     return activated_output
 
 
+def forward_pass(input_img, num_kernels, kernel_size, hidden_layer_sizes, num_classes):
+    conv_output = convolutional_layer(input_img, num_kernels, kernel_size)
+
+    hidden_output = conv_output
+    for layer_size in hidden_layer_sizes:
+        hidden_output = hidden_layer(hidden_output, layer_size)
+
+    probabilities = softmax_output_layer(hidden_output, num_classes)
+    return probabilities
+
+
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
 
@@ -57,19 +68,13 @@ if __name__ == "__main__":
     train_images_gray = rgb2gray_weighted(train_images)
     test_images_gray = rgb2gray_weighted(test_images)
 
-    conv_output = convolutional_layer(train_images_gray[0], num_kernels=2, kernel_size=3)
+    probabilities = forward_pass(train_images_gray[0], num_kernels=2, kernel_size=3, hidden_layer_sizes=[128, 8], num_classes=len(label_names))
 
-    # Pass the flattened output through the fully connected layer
-    output_hidden_1 = hidden_layer(conv_output, output_size=128)
-    output_hidden_2 = hidden_layer(output_hidden_1, output_size=8)
+    print(np.sum(probabilities), "This should be close to 1 due to softmax")
 
-    probabilities = softmax_output_layer(output_hidden_2, len(label_names))
-    print(np.sum(probabilities))
     # Determine the index of the highest probability
     predicted_index = np.argmax(probabilities)
-
     # Get the corresponding class label
     predicted_class = label_names[predicted_index]
-
     print(f"The predicted class is: {predicted_class}")
     print(f"The predicted class probability is: {probabilities[predicted_index]:.6f}")
