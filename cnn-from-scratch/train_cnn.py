@@ -4,12 +4,12 @@ matsjfunke
 
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
-from neural_net_utils import cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, softmax
+from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, softmax
 from scipy.signal import convolve2d
 
 
 class NeuralNetwork:
-    def __init__(self, input_shape, num_kernels, kernel_size, hidden_layer_sizes, num_classes):
+    def __init__(self, input_shape, num_kernels, kernel_size, pooling_kernel_size, stride, hidden_layer_sizes, num_classes):
         self.kernel_size = kernel_size
         self.num_kernels = num_kernels
         self.hidden_layer_sizes = hidden_layer_sizes
@@ -20,8 +20,7 @@ class NeuralNetwork:
 
         # Initialize weights and biases for hidden layers
         self.hidden_layers = []
-        # TODO ensure prev_size works for multiple hidden layers
-        prev_size = 392
+        prev_size = calc_conv_output_size(input_shape, kernel_size, pooling_kernel_size, stride, num_kernels)
         for layer_size in hidden_layer_sizes:
             weights, biases = init_weights_biases(num_inputs=prev_size, num_outputs=layer_size)
             self.hidden_layers.append((weights, biases))
@@ -38,7 +37,7 @@ class NeuralNetwork:
             # Apply relu for non-linearity
             feature_map = relu(feature_map)
             # Apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
-            feature_map = max_pooling(feature_map, kernel_size=3, stride=2)
+            feature_map = max_pooling(feature_map, pooling_kernel_size=3, stride=2)
             feature_maps.append(feature_map)
 
         # Stack feature maps into a 3D tensor
@@ -76,7 +75,9 @@ if __name__ == "__main__":
     test_images_gray = rgb2gray_weighted(test_images)
 
     # Initialize the neural network
-    nn = NeuralNetwork(input_shape=train_images_gray[0].shape, num_kernels=2, kernel_size=3, hidden_layer_sizes=[128, 64], num_classes=len(label_names))
+    nn = NeuralNetwork(
+        input_shape=train_images_gray[0].shape, num_kernels=2, kernel_size=3, pooling_kernel_size=3, stride=2, hidden_layer_sizes=[128, 64], num_classes=len(label_names)
+    )
 
     # Perform forward pass
     probabilities, _ = nn.forward_pass(train_images_gray[0])
