@@ -91,6 +91,15 @@ def load_cifar10(path):
     return train_images, train_labels, test_images, test_labels, label_names
 
 
+def rgb2gray_weighted(images):
+    """
+    Convert RGB images to grayscale using weighted average (luminance).
+    param images: np.array, shape (num_images, height, width, 3)
+    return: np.array, shape (num_images, height, width)
+    """
+    return np.dot(images, [0.2989, 0.5870, 0.1140])
+
+
 if __name__ == "__main__":
     # Set the path to the directory containing the CIFAR-10 batches
     path = "../images/cifar-10-batches-py"
