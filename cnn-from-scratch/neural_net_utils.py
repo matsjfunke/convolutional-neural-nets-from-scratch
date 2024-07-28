@@ -45,6 +45,10 @@ def relu(feature_map):
     return np.maximum(0, feature_map)
 
 
+def relu_derivative(x):
+    return np.where(x > 0, 1, 0)
+
+
 def softmax(logits):
     """
     Parameters: logits (raw scores) from the output layer

@@ -64,6 +64,19 @@ class NeuralNetwork:
         probabilities = self.softmax_output_layer(hidden_output)
         return probabilities, hidden_output
 
+    def back_prop(self, probabilities, true_label):
+        # Compute the loss and its gradient
+        loss, loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
+        print(f"Cross-Entropy Loss: {loss}")
+        print(f"Loss Gradient: {loss_grad}")
+
+        # TODO: Implement the gradient computation for output layer and update step for weights and biases
+        # TODO: Implement the gradient computation for hidden layers and update step for weights and biases
+        # TODO: Implement the gradient computation for convolutiona layer and update step for weights and biases
+        # Backpropagate through Flatten Layer: Reshape the gradient to match the dimensions of the pooled output.
+        # Backpropagate through Pooling Layer: Use the appropriate method to backpropagate through the pooling layer. For max pooling, this involves routing the gradients back to the positions of the maximum values.
+        # Backpropagate through Convolutional Layer: Apply the ReLU derivative to the gradients of the convolutional layer's output. Compute gradients for the convolutional filters. Compute the gradient with respect to the input image (this can be used for further upstream layers if needed).
+
 
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
@@ -83,13 +96,4 @@ if __name__ == "__main__":
     probabilities, _ = nn.forward_pass(train_images_gray[0])
     print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
 
-    # back_prop(probabilities)
-    # def back_prop(probabilities):
-    # true_label = np.zeros(len(label_names))
-    # true_label[train_labels[0]] = 1
-
-    # # Compute the loss and its gradient
-    # loss, loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
-    # print(f"actual label: {label_names[train_labels[0]]}")
-    # print(f"Cross-Entropy Loss: {loss}")
-    # print(f"Loss Gradient: {loss_grad}")
+    nn.back_prop(probabilities, true_label=train_labels[0])
