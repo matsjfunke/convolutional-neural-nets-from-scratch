@@ -20,7 +20,10 @@ def forward_pass(input_img_array, num_kernels, kernel_size):
         feature_map = relu(feature_map)
         feature_maps.append(feature_map)
 
-    return feature_maps
+    # Stack feature maps into a 3D tensor
+    output_tensor = np.stack(feature_maps, axis=-1)
+
+    return output_tensor
 
 
 if __name__ == "__main__":
@@ -33,4 +36,6 @@ if __name__ == "__main__":
     test_images_gray = rgb2gray_weighted(test_images)
 
     output = forward_pass(train_images_gray[0], 2, 3)
-    print(output)
+    print(output.shape)
+    # output tensor shape of (30, 30, 2) --> the input image has been convolved with 2 kernels, resulting in two feature maps of size 30x30
+    # output_tensor shape (28, 28, 5) indicates 5 kernels of size 5x5
