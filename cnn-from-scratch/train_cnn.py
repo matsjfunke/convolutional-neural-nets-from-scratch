@@ -8,66 +8,62 @@ from neural_net_utils import cross_entropy_loss_gradient, init_weights_biases, m
 from scipy.signal import convolve2d
 
 
-def convolutional_layer(input_img_array, num_kernels, kernel_size):
-    # Initalize kernels with random numbers
-    kernels = [np.random.randn(kernel_size, kernel_size) for _ in range(num_kernels)]
+class NeuralNetwork:
+    def __init__(self, input_shape, num_kernels, kernel_size, hidden_layer_sizes, num_classes):
+        self.kernel_size = kernel_size
+        self.num_kernels = num_kernels
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.num_classes = num_classes
 
-    # Convolve image with kernels to create feature_maps
-    feature_maps = []
-    for kernel in kernels:
-        feature_map = convolve2d(input_img_array, kernel, mode="valid")
-        # Apply relu for non-linearity
-        feature_map = relu(feature_map)
-        # Apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
-        feature_map = max_pooling(feature_map, kernel_size=3, stride=2)
-        feature_maps.append(feature_map)
+        # Initialize kernels for convolutional layer
+        self.kernels = [np.random.randn(kernel_size, kernel_size) for _ in range(num_kernels)]
 
-    # Stack feature maps into a 3D tensor
-    output_tensor = np.stack(feature_maps, axis=-1)
+        # Initialize weights and biases for hidden layers
+        self.hidden_layers = []
+        # TODO ensure prev_size works for multiple hidden layers
+        prev_size = 392
+        for layer_size in hidden_layer_sizes:
+            weights, biases = init_weights_biases(num_inputs=prev_size, num_outputs=layer_size)
+            self.hidden_layers.append((weights, biases))
+            prev_size = layer_size
 
-    # Flatten the output tensor to 1D
-    flattened_output = output_tensor.flatten()
-    return flattened_output
+        # Initialize weights and biases for output layer
+        self.output_weights, self.output_biases = init_weights_biases(num_inputs=prev_size, num_outputs=num_classes)
 
+    def convolutional_layer(self, input_img_array):
+        # Convolve image with kernels to create feature_maps
+        feature_maps = []
+        for kernel in self.kernels:
+            feature_map = convolve2d(input_img_array, kernel, mode="valid")
+            # Apply relu for non-linearity
+            feature_map = relu(feature_map)
+            # Apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
+            feature_map = max_pooling(feature_map, kernel_size=3, stride=2)
+            feature_maps.append(feature_map)
 
-def hidden_layer(flattened_input, output_size):
-    input_size = flattened_input.shape[0]
-    weights, biases = init_weights_biases(num_inputs=input_size, num_outputs=output_size)
+        # Stack feature maps into a 3D tensor
+        output_tensor = np.stack(feature_maps, axis=-1)
+        # Flatten the output tensor to 1D
+        flattened_output = output_tensor.flatten()
+        return flattened_output
 
-    # Compute layer output (logits) & apply ReLU
-    activated_output = relu(np.dot(flattened_input, weights) + biases)
-    return activated_output
+    def hidden_layer(self, input, weights, biases):
+        # Compute layer output (logits) & apply ReLU
+        return relu(np.dot(input, weights) + biases)
 
+    def softmax_output_layer(self, hidden_layer_output):
+        # Compute layer output (logits) & apply softmax
+        return softmax(np.dot(hidden_layer_output, self.output_weights) + self.output_biases)
 
-def softmax_output_layer(hidden_layer_output, num_classes):
-    input_size = hidden_layer_output.shape[0]
-    weights, biases = init_weights_biases(num_inputs=input_size, num_outputs=num_classes)
+    def forward_pass(self, input_img):
+        conv_output = self.convolutional_layer(input_img)
 
-    # Compute layer output (logits) & apply softmax
-    activated_output = softmax(np.dot(hidden_layer_output, weights) + biases)
-    return activated_output
+        hidden_output = conv_output
+        for weights, biases in self.hidden_layers:
+            hidden_output = self.hidden_layer(hidden_output, weights, biases)
 
-
-def forward_pass(input_img, num_kernels, kernel_size, hidden_layer_sizes, num_classes):
-    conv_output = convolutional_layer(input_img, num_kernels, kernel_size)
-
-    hidden_output = conv_output
-    for layer_size in hidden_layer_sizes:
-        hidden_output = hidden_layer(hidden_output, layer_size)
-
-    probabilities = softmax_output_layer(hidden_output, num_classes)
-    return probabilities
-
-
-def back_prop(probabilities):
-    true_label = np.zeros(len(label_names))
-    true_label[train_labels[0]] = 1
-
-    # Compute the loss and its gradient
-    loss, loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
-    print(f"actual label: {label_names[train_labels[0]]}")
-    print(f"Cross-Entropy Loss: {loss}")
-    print(f"Loss Gradient: {loss_grad}")
+        probabilities = self.softmax_output_layer(hidden_output)
+        return probabilities, hidden_output
 
 
 if __name__ == "__main__":
@@ -79,7 +75,20 @@ if __name__ == "__main__":
     train_images_gray = rgb2gray_weighted(train_images)
     test_images_gray = rgb2gray_weighted(test_images)
 
-    probabilities = forward_pass(train_images_gray[0], num_kernels=2, kernel_size=3, hidden_layer_sizes=[128, 8], num_classes=len(label_names))
-    print(f"The predicted class is: {label_names[np.argmax(probabilities)]}")
+    # Initialize the neural network
+    nn = NeuralNetwork(input_shape=train_images_gray[0].shape, num_kernels=2, kernel_size=3, hidden_layer_sizes=[128, 64], num_classes=len(label_names))
 
-    back_prop(probabilities)
+    # Perform forward pass
+    probabilities, _ = nn.forward_pass(train_images_gray[0])
+    print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
+
+    # back_prop(probabilities)
+    # def back_prop(probabilities):
+    # true_label = np.zeros(len(label_names))
+    # true_label[train_labels[0]] = 1
+
+    # # Compute the loss and its gradient
+    # loss, loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
+    # print(f"actual label: {label_names[train_labels[0]]}")
+    # print(f"Cross-Entropy Loss: {loss}")
+    # print(f"Loss Gradient: {loss_grad}")
