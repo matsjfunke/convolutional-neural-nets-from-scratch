@@ -219,7 +219,7 @@ def pool_img(img_array, plot=True, pool_size=(2, 2), pool_type="max"):
 
 if __name__ == "__main__":
     # img_path = "images/cafe-dog.png"
-    img_path = "images/skydive-plane.png"
+    img_path = "../images/skydive-plane.png"
     img_array = load_img(img_path)
 
     vertical_edges = vertical_edge_detection(img_array)
