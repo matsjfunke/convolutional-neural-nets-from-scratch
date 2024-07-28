@@ -2,9 +2,10 @@
 matsjfunke
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
-from neural_net_utils import relu
+from neural_net_utils import max_pooling, relu
 from scipy.signal import convolve2d
 
 
@@ -18,6 +19,8 @@ def forward_pass(input_img_array, num_kernels, kernel_size):
         feature_map = convolve2d(input_img_array, kernel, mode="valid")
         # apply relu for non-linearity
         feature_map = relu(feature_map)
+        # apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
+        feature_map = max_pooling(feature_map, kernel_size=3, stride=2)
         feature_maps.append(feature_map)
 
     # Stack feature maps into a 3D tensor
@@ -35,7 +38,12 @@ if __name__ == "__main__":
     train_images_gray = rgb2gray_weighted(train_images)
     test_images_gray = rgb2gray_weighted(test_images)
 
-    output = forward_pass(train_images_gray[0], 2, 3)
+    output = forward_pass(train_images_gray[0], num_kernels=2, kernel_size=3)
     print(output.shape)
-    # output tensor shape of (30, 30, 2) --> the input image has been convolved with 2 kernels, resulting in two feature maps of size 30x30
-    # output_tensor shape (28, 28, 5) indicates 5 kernels of size 5x5
+
+    plt.figure(figsize=(9, 6))
+    plt.imshow(output[0])
+    plt.axis("off")
+    plt.title("feature_map 1")
+
+    plt.show()
