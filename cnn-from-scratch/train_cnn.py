@@ -9,23 +9,26 @@ from scipy.signal import convolve2d
 
 
 def forward_pass(input_img_array, num_kernels, kernel_size):
-    # initalize kernels with random numbers
+    # Initalize kernels with random numbers
     kernels = [np.random.randn(kernel_size, kernel_size) for _ in range(num_kernels)]
 
-    # convolve image with kernels to create feature_maps
+    # Convolve image with kernels to create feature_maps
     feature_maps = []
     for kernel in kernels:
         feature_map = convolve2d(input_img_array, kernel, mode="valid")
-        # apply relu for non-linearity
+        # Apply relu for non-linearity
         feature_map = relu(feature_map)
-        # apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
+        # Apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
         feature_map = max_pooling(feature_map, kernel_size=3, stride=2)
         feature_maps.append(feature_map)
 
     # Stack feature maps into a 3D tensor
     output_tensor = np.stack(feature_maps, axis=-1)
 
-    return output_tensor
+    # Flatten the output tensor to 1D
+    flattened_output = output_tensor.flatten()
+
+    return flattened_output
 
 
 if __name__ == "__main__":
@@ -38,4 +41,4 @@ if __name__ == "__main__":
     test_images_gray = rgb2gray_weighted(test_images)
 
     output = forward_pass(train_images_gray[0], num_kernels=2, kernel_size=3)
-    print(output.shape)
+    print("Flattened output shape:", output.shape)
