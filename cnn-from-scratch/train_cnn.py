@@ -4,6 +4,7 @@ matsjfunke
 
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
+from neural_net_utils import relu
 from scipy.signal import convolve2d
 
 
@@ -15,6 +16,8 @@ def forward_pass(input_img_array, num_kernels, kernel_size):
     feature_maps = []
     for kernel in kernels:
         feature_map = convolve2d(input_img_array, kernel, mode="valid")
+        # apply relu for non-linearity
+        feature_map = relu(feature_map)
         feature_maps.append(feature_map)
 
     return feature_maps
