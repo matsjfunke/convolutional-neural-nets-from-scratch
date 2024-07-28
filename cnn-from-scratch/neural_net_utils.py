@@ -8,6 +8,7 @@ import numpy as np
 def relu(feature_map):
     return np.maximum(0, feature_map)
 
+
 def max_pooling(feature_map, kernel_size=2, stride=2):
     # Calculate the dimensions of the pooled feature map
     pooled_height = (feature_map.shape[0] - kernel_size) // stride + 1
@@ -24,6 +25,3 @@ def max_pooling(feature_map, kernel_size=2, stride=2):
             pooled_feature_map[i, j] = np.max(feature_map[start_i : start_i + kernel_size, start_j : start_j + kernel_size])
 
     return pooled_feature_map
-
-
-

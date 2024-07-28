@@ -2,7 +2,6 @@
 matsjfunke
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
 from neural_net_utils import max_pooling, relu
@@ -40,10 +39,3 @@ if __name__ == "__main__":
 
     output = forward_pass(train_images_gray[0], num_kernels=2, kernel_size=3)
     print(output.shape)
-
-    plt.figure(figsize=(9, 6))
-    plt.imshow(output[0])
-    plt.axis("off")
-    plt.title("feature_map 1")
-
-    plt.show()
