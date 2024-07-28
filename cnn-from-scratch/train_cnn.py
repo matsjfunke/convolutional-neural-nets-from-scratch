@@ -8,7 +8,7 @@ from neural_net_utils import max_pooling, relu
 from scipy.signal import convolve2d
 
 
-def forward_pass(input_img_array, num_kernels, kernel_size):
+def convolutional_layer(input_img_array, num_kernels, kernel_size):
     # Initalize kernels with random numbers
     kernels = [np.random.randn(kernel_size, kernel_size) for _ in range(num_kernels)]
 
@@ -31,6 +31,21 @@ def forward_pass(input_img_array, num_kernels, kernel_size):
     return flattened_output
 
 
+def hidden_layer(flattened_input, output_size):
+    input_size = flattened_input.shape[0]
+    # Initialize weights and biases
+    weights = np.random.randn(input_size, output_size) * 0.01
+    biases = np.zeros(output_size)
+
+    # Compute layer output
+    fc_output = np.dot(flattened_input, weights) + biases
+
+    # Apply ReLU activation
+    activated_output = relu(fc_output)
+
+    return activated_output
+
+
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
 
@@ -40,5 +55,9 @@ if __name__ == "__main__":
     train_images_gray = rgb2gray_weighted(train_images)
     test_images_gray = rgb2gray_weighted(test_images)
 
-    output = forward_pass(train_images_gray[0], num_kernels=2, kernel_size=3)
-    print("Flattened output shape:", output.shape)
+    conv_output = convolutional_layer(train_images_gray[0], num_kernels=2, kernel_size=3)
+
+    # Pass the flattened output through the fully connected layer
+    output = hidden_layer(conv_output, output_size=128)
+    output = hidden_layer(output, output_size=8)
+    print(output)
