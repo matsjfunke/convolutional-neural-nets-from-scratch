@@ -4,7 +4,7 @@ matsjfunke
 
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
-from neural_net_utils import max_pooling, relu
+from neural_net_utils import init_weights_biases, max_pooling, relu, softmax
 from scipy.signal import convolve2d
 
 
@@ -27,22 +27,24 @@ def convolutional_layer(input_img_array, num_kernels, kernel_size):
 
     # Flatten the output tensor to 1D
     flattened_output = output_tensor.flatten()
-
     return flattened_output
 
 
 def hidden_layer(flattened_input, output_size):
     input_size = flattened_input.shape[0]
-    # Initialize weights and biases
-    weights = np.random.randn(input_size, output_size) * 0.01
-    biases = np.zeros(output_size)
+    weights, biases = init_weights_biases(num_inputs=input_size, num_outputs=output_size)
 
-    # Compute layer output
-    fc_output = np.dot(flattened_input, weights) + biases
+    # Compute layer output (logits) & apply ReLU
+    activated_output = relu(np.dot(flattened_input, weights) + biases)
+    return activated_output
 
-    # Apply ReLU activation
-    activated_output = relu(fc_output)
 
+def softmax_output_layer(hidden_layer_output, num_classes):
+    input_size = hidden_layer_output.shape[0]
+    weights, biases = init_weights_biases(num_inputs=input_size, num_outputs=num_classes)
+
+    # Compute layer output (logits) & apply softmax
+    activated_output = softmax(np.dot(hidden_layer_output, weights) + biases)
     return activated_output
 
 
@@ -58,6 +60,16 @@ if __name__ == "__main__":
     conv_output = convolutional_layer(train_images_gray[0], num_kernels=2, kernel_size=3)
 
     # Pass the flattened output through the fully connected layer
-    output = hidden_layer(conv_output, output_size=128)
-    output = hidden_layer(output, output_size=8)
-    print(output)
+    output_hidden_1 = hidden_layer(conv_output, output_size=128)
+    output_hidden_2 = hidden_layer(output_hidden_1, output_size=8)
+
+    probabilities = softmax_output_layer(output_hidden_2, len(label_names))
+    print(np.sum(probabilities))
+    # Determine the index of the highest probability
+    predicted_index = np.argmax(probabilities)
+
+    # Get the corresponding class label
+    predicted_class = label_names[predicted_index]
+
+    print(f"The predicted class is: {predicted_class}")
+    print(f"The predicted class probability is: {probabilities[predicted_index]:.6f}")

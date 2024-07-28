@@ -9,6 +9,22 @@ def relu(feature_map):
     return np.maximum(0, feature_map)
 
 
+def softmax(logits):
+    """
+    Parameters: logits (raw scores) from the output layer
+    Returns: computed probabilities for each class
+    """
+    exp_logits = np.exp(logits - np.max(logits))  # For numerical stability
+    probabilities = exp_logits / np.sum(exp_logits)
+    return probabilities
+
+
+def init_weights_biases(num_inputs, num_outputs):
+    weights = np.random.randn(num_inputs, num_outputs) * 0.01
+    biases = np.zeros(num_outputs)
+    return weights, biases
+
+
 def max_pooling(feature_map, kernel_size=2, stride=2):
     # Calculate the dimensions of the pooled feature map
     pooled_height = (feature_map.shape[0] - kernel_size) // stride + 1
