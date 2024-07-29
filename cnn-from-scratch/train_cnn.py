@@ -1,10 +1,6 @@
-"""
-matsjfunke
-"""
-
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
-from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, softmax
+from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, relu_derivative, softmax
 from scipy.signal import convolve2d
 
 
@@ -12,6 +8,8 @@ class NeuralNetwork:
     def __init__(self, input_shape, num_kernels, kernel_size, pooling_kernel_size, stride, hidden_layer_sizes, num_classes):
         self.kernel_size = kernel_size
         self.num_kernels = num_kernels
+        self.pooling_kernel_size = pooling_kernel_size
+        self.stride = stride
         self.hidden_layer_sizes = hidden_layer_sizes
         self.num_classes = num_classes
 
@@ -37,7 +35,7 @@ class NeuralNetwork:
             # Apply relu for non-linearity
             feature_map = relu(feature_map)
             # Apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
-            feature_map = max_pooling(feature_map, pooling_kernel_size=3, stride=2)
+            feature_map = max_pooling(feature_map, self.pooling_kernel_size, self.stride)
             feature_maps.append(feature_map)
 
         # Stack feature maps into a 3D tensor
@@ -57,30 +55,51 @@ class NeuralNetwork:
     def forward_pass(self, input_img):
         conv_output = self.convolutional_layer(input_img)
 
+        hidden_outputs = []
         hidden_output = conv_output
         for weights, biases in self.hidden_layers:
             hidden_output = self.hidden_layer(hidden_output, weights, biases)
+            hidden_outputs.append(hidden_output)
 
         probabilities = self.softmax_output_layer(hidden_output)
-        return probabilities, hidden_output
+        return probabilities, conv_output, hidden_outputs
 
-    def back_prop(self, probabilities, hidden_output, true_label, learning_rate=0.001):
+    def back_prop(self, probabilities, conv_output, hidden_outputs, true_label, learning_rate=0.001):
         # Compute the loss and its gradient
-        loss, loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
+        loss, output_loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
         print(f"Cross-Entropy Loss: {loss}")
-        print(f"Loss Gradient: {loss_grad}")
+        print(f"Loss Gradient: {output_loss_grad}")
 
-        print("pre output_weight", self.output_weights[0])
-
-        # gradient descent on output layer
-        output_weights_grad = np.outer(hidden_output, loss_grad)
-        output_biases_grad = loss_grad
+        # Gradient descent on output layer
+        hidden_output = hidden_outputs[-1]
+        output_weights_grad = np.outer(hidden_output, output_loss_grad)
+        output_biases_grad = output_loss_grad
         self.output_weights -= learning_rate * output_weights_grad
         self.output_biases -= learning_rate * output_biases_grad
+        print(f"Updated output weights: {self.output_weights.shape}")
+        print(f"Updated output biases: {self.output_biases.shape}")
 
-        print("post output_weight", self.output_weights[0])
+        # Backpropagation through hidden layers (reversed)
+        next_layer_grad = np.dot(output_loss_grad, self.output_weights.T) * relu_derivative(hidden_outputs[-1])
+        for i in range(len(self.hidden_layers) - 1, -1, -1):
+            weights, biases = self.hidden_layers[i]
+            input_to_layer = conv_output if i == 0 else hidden_outputs[i - 1]
 
-        # TODO: Implement the gradient computation for hidden layers and update step for weights and biases
+            weights_grad = np.outer(input_to_layer, next_layer_grad)
+            biases_grad = next_layer_grad
+
+            # Update hidden layer weights and biases
+            self.hidden_layers[i] = (weights - learning_rate * weights_grad, biases - learning_rate * biases_grad)
+            print(f"Layer {i+1} weights: {self.hidden_layers[i][0].shape}")
+            print(f"Layer {i+1} biases: {self.hidden_layers[i][1].shape}")
+
+            # Prepare next layer gradient
+            if i > 0:
+                next_layer_grad = np.dot(next_layer_grad, weights.T) * relu_derivative(hidden_outputs[i - 1])
+
+         # TODO: Implement gradient computation for convolutional layer and update step
+        # Implement backpropagation through pooling layer
+        # Implement backpropagation through convolutional layer
 
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
@@ -97,12 +116,7 @@ if __name__ == "__main__":
     )
 
     # Perform forward pass
-    probabilities, hidden_output = nn.forward_pass(train_images_gray[0])
+    probabilities, conv_output, hidden_outputs = nn.forward_pass(train_images_gray[0])
     print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
 
-    nn.back_prop(probabilities, hidden_output, true_label=train_labels[0], learning_rate=0.01)
-
-    # TODO: Implement the gradient computation for convolutiona layer and update step for weights and biases
-    # Backpropagate through Flatten Layer: Reshape the gradient to match the dimensions of the pooled output.
-    # Backpropagate through Pooling Layer: Use the appropriate method to backpropagate through the pooling layer. For max pooling, this involves routing the gradients back to the positions of the maximum values.
-    # Backpropagate through Convolutional Layer: Apply the ReLU derivative to the gradients of the convolutional layer's output. Compute gradients for the convolutional filters. Compute the gradient with respect to the input image (this can be used for further upstream layers if needed).
+    nn.back_prop(probabilities, conv_output, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
