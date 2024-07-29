@@ -4,8 +4,27 @@ from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient,
 from scipy.signal import convolve2d
 
 
+def conv_weights_grad(input_img, kernels, grad_output):
+    """
+    Parameter:
+        input_img (np.array): The input image to the convolutional layer.
+        kernels (list of np.array): The kernels of the convolutional layer.
+        grad_output (list of np.array): Gradients of the output feature maps (w.r.t. loss).
+
+    Returns:
+        list of np.array: The gradients of the kernels.
+    """
+    grads = []
+    for i in range(kernels):
+        # The gradient of each kernel is obtained by convolving the gradient of the output feature map with the input image
+        grad = convolve2d(input_img, grad_output[i], mode="valid")
+        grads.append(grad)
+    return grads
+
+
 class NeuralNetwork:
     def __init__(self, input_shape, num_kernels, kernel_size, pooling_kernel_size, stride, hidden_layer_sizes, num_classes):
+        self.input_shape = input_shape
         self.kernel_size = kernel_size
         self.num_kernels = num_kernels
         self.pooling_kernel_size = pooling_kernel_size
@@ -15,6 +34,7 @@ class NeuralNetwork:
 
         # Initialize kernels for convolutional layer
         self.kernels = [np.random.randn(kernel_size, kernel_size) for _ in range(num_kernels)]
+        self.kernels_grads = [np.zeros_like(kernel) for kernel in self.kernels]
 
         # Initialize weights and biases for hidden layers
         self.hidden_layers = []
@@ -42,7 +62,7 @@ class NeuralNetwork:
         output_tensor = np.stack(feature_maps, axis=-1)
         # Flatten the output tensor to 1D
         flattened_output = output_tensor.flatten()
-        return flattened_output
+        return flattened_output, output_tensor
 
     def hidden_layer(self, input, weights, biases):
         # Compute layer output (logits) & apply ReLU
@@ -53,7 +73,7 @@ class NeuralNetwork:
         return softmax(np.dot(hidden_layer_output, self.output_weights) + self.output_biases)
 
     def forward_pass(self, input_img):
-        conv_output = self.convolutional_layer(input_img)
+        conv_output, conv_pre_flatten = self.convolutional_layer(input_img)
 
         hidden_outputs = []
         hidden_output = conv_output
@@ -62,15 +82,15 @@ class NeuralNetwork:
             hidden_outputs.append(hidden_output)
 
         probabilities = self.softmax_output_layer(hidden_output)
-        return probabilities, conv_output, hidden_outputs
+        return probabilities, conv_output, conv_pre_flatten, hidden_outputs
 
-    def back_prop(self, probabilities, conv_output, hidden_outputs, true_label, learning_rate=0.001):
+    def back_prop(self, probabilities, conv_output, conv_pre_flatten, hidden_outputs, true_label, learning_rate=0.001):
         # Compute the loss and its gradient
         loss, output_loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
         print(f"Cross-Entropy Loss: {loss}")
         print(f"Loss Gradient: {output_loss_grad}")
 
-        # Gradient descent on output layer
+        # Backpropagation through output layer
         hidden_output = hidden_outputs[-1]
         output_weights_grad = np.outer(hidden_output, output_loss_grad)
         output_biases_grad = output_loss_grad
@@ -97,9 +117,18 @@ class NeuralNetwork:
             if i > 0:
                 next_layer_grad = np.dot(next_layer_grad, weights.T) * relu_derivative(hidden_outputs[i - 1])
 
-         # TODO: Implement gradient computation for convolutional layer and update step
-        # Implement backpropagation through pooling layer
-        # Implement backpropagation through convolutional layer
+        # Compute gradients for the convolutional layer
+        print(conv_pre_flatten.shape)  # outputs (14, 14, 2)
+        conv_output_grad = relu_derivative(conv_output)
+        print(conv_output_grad.shape)  # outputs (392,)
+        kernels_grads = conv_weights_grad(conv_pre_flatten, self.num_kernels, conv_output_grad)
+
+        # Update kernels
+        for i in range(len(self.kernels)):
+            self.kernels[i] -= learning_rate * kernels_grads[i]
+
+        print(f"Updated kernels shapes: {[kernel.shape for kernel in self.kernels]}")
+
 
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
@@ -116,7 +145,7 @@ if __name__ == "__main__":
     )
 
     # Perform forward pass
-    probabilities, conv_output, hidden_outputs = nn.forward_pass(train_images_gray[0])
+    probabilities, conv_output, conv_pre_flatten, hidden_outputs = nn.forward_pass(train_images_gray[0])
     print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
 
-    nn.back_prop(probabilities, conv_output, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
+    nn.back_prop(probabilities, conv_output, conv_pre_flatten, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
