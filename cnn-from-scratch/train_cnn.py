@@ -64,19 +64,23 @@ class NeuralNetwork:
         probabilities = self.softmax_output_layer(hidden_output)
         return probabilities, hidden_output
 
-    def back_prop(self, probabilities, true_label):
+    def back_prop(self, probabilities, hidden_output, true_label, learning_rate=0.001):
         # Compute the loss and its gradient
         loss, loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
         print(f"Cross-Entropy Loss: {loss}")
         print(f"Loss Gradient: {loss_grad}")
 
-        # TODO: Implement the gradient computation for output layer and update step for weights and biases
-        # TODO: Implement the gradient computation for hidden layers and update step for weights and biases
-        # TODO: Implement the gradient computation for convolutiona layer and update step for weights and biases
-        # Backpropagate through Flatten Layer: Reshape the gradient to match the dimensions of the pooled output.
-        # Backpropagate through Pooling Layer: Use the appropriate method to backpropagate through the pooling layer. For max pooling, this involves routing the gradients back to the positions of the maximum values.
-        # Backpropagate through Convolutional Layer: Apply the ReLU derivative to the gradients of the convolutional layer's output. Compute gradients for the convolutional filters. Compute the gradient with respect to the input image (this can be used for further upstream layers if needed).
+        print("pre output_weight", self.output_weights[0])
 
+        # gradient descent on output layer
+        output_weights_grad = np.outer(hidden_output, loss_grad)
+        output_biases_grad = loss_grad
+        self.output_weights -= learning_rate * output_weights_grad
+        self.output_biases -= learning_rate * output_biases_grad
+
+        print("post output_weight", self.output_weights[0])
+
+        # TODO: Implement the gradient computation for hidden layers and update step for weights and biases
 
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
@@ -93,7 +97,12 @@ if __name__ == "__main__":
     )
 
     # Perform forward pass
-    probabilities, _ = nn.forward_pass(train_images_gray[0])
+    probabilities, hidden_output = nn.forward_pass(train_images_gray[0])
     print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
 
-    nn.back_prop(probabilities, true_label=train_labels[0])
+    nn.back_prop(probabilities, hidden_output, true_label=train_labels[0], learning_rate=0.01)
+
+    # TODO: Implement the gradient computation for convolutiona layer and update step for weights and biases
+    # Backpropagate through Flatten Layer: Reshape the gradient to match the dimensions of the pooled output.
+    # Backpropagate through Pooling Layer: Use the appropriate method to backpropagate through the pooling layer. For max pooling, this involves routing the gradients back to the positions of the maximum values.
+    # Backpropagate through Convolutional Layer: Apply the ReLU derivative to the gradients of the convolutional layer's output. Compute gradients for the convolutional filters. Compute the gradient with respect to the input image (this can be used for further upstream layers if needed).
