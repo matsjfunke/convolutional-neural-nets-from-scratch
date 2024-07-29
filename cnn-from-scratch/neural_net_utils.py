@@ -46,7 +46,7 @@ def relu(feature_map):
 
 
 def relu_derivative(x):
-    return np.where(x > 0, 1, 0)
+    return (x > 0).astype(int)
 
 
 def softmax(logits):
@@ -72,3 +72,53 @@ def cross_entropy_loss_gradient(true_labels, predicted_probs):
     loss = -np.sum(true_labels * np.log(predicted_probs))
     grad = predicted_probs - true_labels
     return loss, grad
+
+
+def max_pooling_backward(d_pooled_output, conv_output, pool_size, stride):
+    """
+    Backward pass for max pooling layer.
+
+    Parameters:
+    - d_pooled_output: Gradient of the loss with respect to the pooled output.
+    - conv_output: Output of the convolutional layer before pooling.
+    - pool_size: Size of the pooling kernel.
+    - stride: Stride used in pooling.
+
+    Returns:
+    - d_conv_output: Gradient of the loss with respect to the convolutional layer output.
+    """
+
+    # Determine the dimensions of the input feature maps
+    input_height, input_width, num_kernels = conv_output.shape
+
+    # Initialize gradient with respect to the convolutional layer output
+    d_conv_output = np.zeros_like(conv_output)
+
+    # Iterate over each kernel and its corresponding pooled output
+    for i in range(num_kernels):
+        # Extract the pooled output for the current kernel
+        d_pooled = d_pooled_output[:, :, i]
+
+        # Calculate the dimensions of the pooled feature map
+        pooled_height, pooled_width = d_pooled.shape
+
+        # Initialize the gradient for the pooled positions
+        max_indices = np.zeros((pooled_height, pooled_width, 2), dtype=int)
+
+        # Reconstruct the indices of the max values from the convolution output
+        for y in range(pooled_height):
+            for x in range(pooled_width):
+                # Extract the region of the convolution output that was pooled
+                region = conv_output[y * stride : y * stride + pool_size, x * stride : x * stride + pool_size, i]
+
+                # Find the index of the max value in this region
+                max_index = np.unravel_index(np.argmax(region), region.shape)
+                max_indices[y, x] = max_index
+
+        # Distribute the gradients to the positions of the max values
+        for y in range(pooled_height):
+            for x in range(pooled_width):
+                max_index = max_indices[y, x]
+                d_conv_output[y * stride + max_index[0], x * stride + max_index[1], i] += d_pooled[y, x]
+
+    return d_conv_output
