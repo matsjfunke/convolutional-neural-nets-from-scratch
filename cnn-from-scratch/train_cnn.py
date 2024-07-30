@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
 from neural_net_utils import calc_conv_output_size, conv_weights_grad, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, relu_derivative, softmax
@@ -28,6 +29,18 @@ class NeuralNetwork:
 
         # Initialize weights and biases for output layer
         self.output_weights, self.output_biases = init_weights_biases(num_inputs=prev_size, num_outputs=num_classes)
+
+    def save_params(self, filename):
+        with open(filename, "wb") as f:
+            pickle.dump({"kernels": self.kernels, "hidden_layers": self.hidden_layers, "output_weights": self.output_weights, "output_biases": self.output_biases}, f)
+
+    def load_params(self, filename):
+        with open(filename, "rb") as f:
+            params = pickle.load(f)
+            self.kernels = params["kernels"]
+            self.hidden_layers = params["hidden_layers"]
+            self.output_weights = params["output_weights"]
+            self.output_biases = params["output_biases"]
 
     def convolutional_layer(self, input_img_array):
         # Convolve image with kernels to create feature_maps
@@ -153,3 +166,18 @@ if __name__ == "__main__":
 
     # Train the neural network
     nn.train(train_images_gray, train_labels, num_epochs=10, batch_size=32, learning_rate=0.01)
+
+    # Save the trained parameters
+    nn.save_params("trained_model.pkl")
+
+    # Load the trained parameters (for future use)
+    nn.load_params("trained_model.pkl")
+
+    # Example prediction
+    import random
+
+    pred_index = random.randint(0, 9999)
+    probabilities, _, _ = nn.forward_pass(test_images_gray[pred_index])
+    predicted_label = np.argmax(probabilities)
+    print(f"Predicted index: {pred_index}, predicted label: {label_names[predicted_label]}, actual label: {label_names[test_labels[pred_index]]}")
+    print(f"Predicted probabilities: {probabilities}")
