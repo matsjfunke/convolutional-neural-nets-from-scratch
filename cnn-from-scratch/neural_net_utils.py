@@ -55,12 +55,23 @@ def softmax(logits):
     Parameters: logits (raw scores) from the output layer
     Returns: computed probabilities for each class
     """
-    exp_logits = np.exp(logits - np.max(logits))  # For numerical stability
-    probabilities = exp_logits / np.sum(exp_logits)
-    return probabilities
+    # Check for NaNs or Infs in logits
+    if np.any(np.isnan(logits)) or np.any(np.isinf(logits)):
+        raise ValueError("Logits contain NaNs or Infs")
+
+    # Subtract the max for numerical stability
+    logits = np.asarray(logits)  # Ensure logits is an array
+    max_logits = np.max(logits)
+    stable_logits = logits - max_logits
+
+    # Clip logits to avoid overflow in exponentiation
+    clipped_logits = np.clip(stable_logits, -700, 700)
+
+    exp_logits = np.exp(clipped_logits)
+    return exp_logits / np.sum(exp_logits)
 
 
-def cross_entropy_loss_gradient(true_labels, predicted_probs):
+def cross_entropy_loss_gradient(true_labels, predicted_probs, epsilon=1e-15):
     """
     Parameters:
     - np.ndarray One-hot encoded true labels.
@@ -70,9 +81,11 @@ def cross_entropy_loss_gradient(true_labels, predicted_probs):
     - float: Cross-entropy loss.
     - np.ndarray: Gradient of the loss with respect to the predicted probabilities.
     """
+    # Clip probabilities to avoid log(0)
+    predicted_probs = np.clip(predicted_probs, epsilon, 1 - epsilon)
     loss = -np.sum(true_labels * np.log(predicted_probs))
-    grad = predicted_probs - true_labels
-    return loss, grad
+    gradient = predicted_probs - true_labels
+    return loss, gradient
 
 
 def conv_weights_grad(input_img, kernels, grad_output):
