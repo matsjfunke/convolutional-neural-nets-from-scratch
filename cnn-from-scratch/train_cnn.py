@@ -69,17 +69,14 @@ class NeuralNetwork:
     def back_prop(self, input_img, probabilities, conv_output, hidden_outputs, true_label, learning_rate=0.001):
         # Compute the loss and its gradient
         loss, output_loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
-        print(f"Cross-Entropy Loss: {loss}")
-        print(f"Loss Gradient: {output_loss_grad}")
 
         # Backpropagation through output layer
         hidden_output = hidden_outputs[-1]
         output_weights_grad = np.outer(hidden_output, output_loss_grad)
         output_biases_grad = output_loss_grad
+        # apply gradient descent to weights & biases
         self.output_weights -= learning_rate * output_weights_grad
         self.output_biases -= learning_rate * output_biases_grad
-        print(f"Updated output weights: {self.output_weights.shape}")
-        print(f"Updated output biases: {self.output_biases.shape}")
 
         # Backpropagation through hidden layers (reversed)
         next_layer_grad = np.dot(output_loss_grad, self.output_weights.T) * relu_derivative(hidden_outputs[-1])
@@ -90,25 +87,24 @@ class NeuralNetwork:
             weights_grad = np.outer(input_to_layer, next_layer_grad)
             biases_grad = next_layer_grad
 
-            # Update hidden layer weights and biases
+            # apply gradient descent to weights & biases
             self.hidden_layers[i] = (weights - learning_rate * weights_grad, biases - learning_rate * biases_grad)
-            print(f"Layer {i+1} weights: {self.hidden_layers[i][0].shape}")
-            print(f"Layer {i+1} biases: {self.hidden_layers[i][1].shape}")
 
             # Prepare next layer gradient
             if i > 0:
                 next_layer_grad = np.dot(next_layer_grad, weights.T) * relu_derivative(hidden_outputs[i - 1])
 
-        # Compute gradients for the convolutional layer
+        # Backpropagation through convolutional layer
         # TODO: may need to correct, relu_derivative should be applied to activations before pooling, not directly to the flattened output
         # ensures conv_output_grad correct represents the gradient for the convolutional layer
         conv_output_grad = relu_derivative(conv_output)
         kernels_grads = conv_weights_grad(input_img, self.kernels, conv_output_grad)
 
-        # Update kernels
+        # apply gradient descent to kernels
         for i in range(len(self.kernels)):
             self.kernels[i] -= learning_rate * kernels_grads[i]
-        print(f"Updated kernels shapes: {[kernel.shape for kernel in self.kernels]}")
+
+        return loss
 
 
 if __name__ == "__main__":
@@ -129,4 +125,6 @@ if __name__ == "__main__":
     probabilities, conv_output, hidden_outputs = nn.forward_pass(train_images_gray[0])
     print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
 
-    nn.back_prop(train_images_gray[0], probabilities, conv_output, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
+    # Perform backward pass
+    loss = nn.back_prop(train_images_gray[0], probabilities, conv_output, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
+    print(f"Loss: {loss}")
