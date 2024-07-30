@@ -6,6 +6,13 @@ import numpy as np
 from scipy.signal import convolve2d
 
 
+def init_weights_biases(num_inputs, num_outputs):
+    stddev = np.sqrt(2.0 / num_inputs)
+    weights = np.random.randn(num_inputs, num_outputs) * stddev
+    biases = np.zeros(num_outputs)
+    return weights, biases
+
+
 def max_pooling(feature_map, pooling_kernel_size=2, stride=2):
     # Calculate the dimensions of the pooled feature map
     pooled_height = (feature_map.shape[0] - pooling_kernel_size) // stride + 1
@@ -36,14 +43,8 @@ def calc_conv_output_size(input_size, kernel_size, pooling_kernel_size, stride, 
     return pooled_height * pooled_width * num_kernels
 
 
-def init_weights_biases(num_inputs, num_outputs):
-    weights = np.random.randn(num_inputs, num_outputs) * 0.01
-    biases = np.zeros(num_outputs)
-    return weights, biases
-
-
-def relu(feature_map):
-    return np.maximum(0, feature_map)
+def relu(x):
+    return np.clip(np.maximum(0, x), 0, 1e10)  # Clip to avoid extreme values
 
 
 def relu_derivative(x):

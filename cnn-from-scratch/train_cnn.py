@@ -106,25 +106,50 @@ class NeuralNetwork:
 
         return loss
 
+    def train(self, train_images, train_labels, num_epochs=10, batch_size=32, learning_rate=0.001):
+        num_samples = train_images.shape[0]
+        for epoch in range(num_epochs):
+            epoch_loss = 0
+            correct_predictions = 0
+            num_batches = num_samples // batch_size
+
+            for batch_start in range(0, num_samples, batch_size):
+                batch_end = min(batch_start + batch_size, num_samples)
+                batch_images = train_images[batch_start:batch_end]
+                batch_labels = train_labels[batch_start:batch_end]
+
+                for i in range(batch_images.shape[0]):
+                    input_img = batch_images[i]
+                    true_label = batch_labels[i]
+
+                    # Forward pass
+                    probabilities, conv_output, hidden_outputs = self.forward_pass(input_img)
+
+                    # Compute loss and update gradients
+                    loss = self.back_prop(input_img, probabilities, conv_output, hidden_outputs, true_label, learning_rate)
+
+                    # Track loss and accuracy
+                    epoch_loss += loss
+                    if np.argmax(probabilities) == true_label:
+                        correct_predictions += 1
+
+            # Print loss and accuracy for the epoch
+            average_loss = epoch_loss / num_batches
+            accuracy = correct_predictions / num_samples
+            print(f"Epoch {epoch+1}/{num_epochs}, Loss: {average_loss:.4f}, Accuracy: {accuracy:.4f}")
+
 
 if __name__ == "__main__":
     path = "../images/cifar-10-batches-py"
 
     train_images, train_labels, test_images, test_labels, label_names = load_cifar10(path)
 
-    # Convert to grayscale using weighted average
     train_images_gray = rgb2gray_weighted(train_images)
     test_images_gray = rgb2gray_weighted(test_images)
 
-    # Initialize the neural network
     nn = NeuralNetwork(
         input_shape=train_images_gray[0].shape, num_kernels=2, kernel_size=3, pooling_kernel_size=3, stride=2, hidden_layer_sizes=[128, 64], num_classes=len(label_names)
     )
 
-    # Perform forward pass
-    probabilities, conv_output, hidden_outputs = nn.forward_pass(train_images_gray[0])
-    print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
-
-    # Perform backward pass
-    loss = nn.back_prop(train_images_gray[0], probabilities, conv_output, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
-    print(f"Loss: {loss}")
+    # Train the neural network
+    nn.train(train_images_gray, train_labels, num_epochs=10, batch_size=32, learning_rate=0.01)
