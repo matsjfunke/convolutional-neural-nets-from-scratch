@@ -1,25 +1,7 @@
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
-from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, relu_derivative, softmax
+from neural_net_utils import calc_conv_output_size, conv_weights_grad, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, relu_derivative, softmax
 from scipy.signal import convolve2d
-
-
-def conv_weights_grad(input_img, kernels, grad_output):
-    """
-    Parameter:
-        input_img (np.array): The input image to the convolutional layer.
-        kernels (list of np.array): The kernels of the convolutional layer.
-        grad_output (list of np.array): Gradients of the output feature maps (w.r.t. loss).
-
-    Returns:
-        list of np.array: The gradients of the kernels.
-    """
-    grads = []
-    for i in range(kernels):
-        # The gradient of each kernel is obtained by convolving the gradient of the output feature map with the input image
-        grad = convolve2d(input_img, grad_output[i], mode="valid")
-        grads.append(grad)
-    return grads
 
 
 class NeuralNetwork:
@@ -62,7 +44,7 @@ class NeuralNetwork:
         output_tensor = np.stack(feature_maps, axis=-1)
         # Flatten the output tensor to 1D
         flattened_output = output_tensor.flatten()
-        return flattened_output, output_tensor
+        return flattened_output
 
     def hidden_layer(self, input, weights, biases):
         # Compute layer output (logits) & apply ReLU
@@ -73,7 +55,7 @@ class NeuralNetwork:
         return softmax(np.dot(hidden_layer_output, self.output_weights) + self.output_biases)
 
     def forward_pass(self, input_img):
-        conv_output, conv_pre_flatten = self.convolutional_layer(input_img)
+        conv_output = self.convolutional_layer(input_img)
 
         hidden_outputs = []
         hidden_output = conv_output
@@ -82,9 +64,9 @@ class NeuralNetwork:
             hidden_outputs.append(hidden_output)
 
         probabilities = self.softmax_output_layer(hidden_output)
-        return probabilities, conv_output, conv_pre_flatten, hidden_outputs
+        return probabilities, conv_output, hidden_outputs
 
-    def back_prop(self, probabilities, conv_output, conv_pre_flatten, hidden_outputs, true_label, learning_rate=0.001):
+    def back_prop(self, input_img, probabilities, conv_output, hidden_outputs, true_label, learning_rate=0.001):
         # Compute the loss and its gradient
         loss, output_loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
         print(f"Cross-Entropy Loss: {loss}")
@@ -118,15 +100,14 @@ class NeuralNetwork:
                 next_layer_grad = np.dot(next_layer_grad, weights.T) * relu_derivative(hidden_outputs[i - 1])
 
         # Compute gradients for the convolutional layer
-        print(conv_pre_flatten.shape)  # outputs (14, 14, 2)
+        # TODO: may need to correct, relu_derivative should be applied to activations before pooling, not directly to the flattened output
+        # ensures conv_output_grad correct represents the gradient for the convolutional layer
         conv_output_grad = relu_derivative(conv_output)
-        print(conv_output_grad.shape)  # outputs (392,)
-        kernels_grads = conv_weights_grad(conv_pre_flatten, self.num_kernels, conv_output_grad)
+        kernels_grads = conv_weights_grad(input_img, self.kernels, conv_output_grad)
 
         # Update kernels
         for i in range(len(self.kernels)):
             self.kernels[i] -= learning_rate * kernels_grads[i]
-
         print(f"Updated kernels shapes: {[kernel.shape for kernel in self.kernels]}")
 
 
@@ -145,7 +126,7 @@ if __name__ == "__main__":
     )
 
     # Perform forward pass
-    probabilities, conv_output, conv_pre_flatten, hidden_outputs = nn.forward_pass(train_images_gray[0])
+    probabilities, conv_output, hidden_outputs = nn.forward_pass(train_images_gray[0])
     print(f"The predicted class is: {label_names[np.argmax(probabilities)]}, actual class is: {label_names[train_labels[0]]}")
 
-    nn.back_prop(probabilities, conv_output, conv_pre_flatten, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
+    nn.back_prop(train_images_gray[0], probabilities, conv_output, hidden_outputs, true_label=train_labels[0], learning_rate=0.01)
