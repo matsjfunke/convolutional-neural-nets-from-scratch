@@ -1,12 +1,9 @@
 # Convolutional Neural Networks (CNNs)
 
-## [What are Convolutional Neural Networks?](#what-are-convolutional-neural-networks)
-
-## [Why use Convolutional Neural Networks?](#why-use-convolutional-neural-networks)
-
-## [Structure of a Convolutional Layer](#structure-of-a-convolutional-layer)
-
-## [Backpropagation in a Convolutional Layer](#backpropagation-in-a-convolutional-layer)
+- [What are Convolutional Neural Networks?](#what-are-convolutional-neural-networks)
+- [Why use Convolutional Neural Networks?](#why-use-convolutional-neural-networks)
+- [Structure of a Convolutional Layer](#structure-of-a-convolutional-layer)
+- [Backpropagation in a Convolutional Layer](#backpropagation-in-a-convolutional-layer)
 
 ## What are Convolutional Neural Networks?
 
