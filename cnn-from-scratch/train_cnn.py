@@ -1,4 +1,5 @@
 import pickle
+
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
 from neural_net_utils import calc_conv_output_size, conv_weights_grad, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, relu_derivative, softmax
@@ -57,7 +58,7 @@ class NeuralNetwork:
         output_tensor = np.stack(feature_maps, axis=-1)
         # Flatten the output tensor to 1D
         flattened_output = output_tensor.flatten()
-        return flattened_output
+        return flattened_output, output_tensor
 
     def hidden_layer(self, input, weights, biases):
         # Compute layer output (logits) & apply ReLU
@@ -68,7 +69,7 @@ class NeuralNetwork:
         return softmax(np.dot(hidden_layer_output, self.output_weights) + self.output_biases)
 
     def forward_pass(self, input_img):
-        conv_output = self.convolutional_layer(input_img)
+        conv_output, conv_pre_flatten = self.convolutional_layer(input_img)
 
         hidden_outputs = []
         hidden_output = conv_output
@@ -77,9 +78,9 @@ class NeuralNetwork:
             hidden_outputs.append(hidden_output)
 
         probabilities = self.softmax_output_layer(hidden_output)
-        return probabilities, conv_output, hidden_outputs
+        return probabilities, conv_output, conv_pre_flatten, hidden_outputs
 
-    def back_prop(self, input_img, probabilities, conv_output, hidden_outputs, true_label, learning_rate=0.001):
+    def back_prop(self, input_img, probabilities, conv_pre_flatten, conv_output, hidden_outputs, true_label, learning_rate=0.001):
         # Compute the loss and its gradient
         loss, output_loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
 
@@ -108,10 +109,13 @@ class NeuralNetwork:
                 next_layer_grad = np.dot(next_layer_grad, weights.T) * relu_derivative(hidden_outputs[i - 1])
 
         # Backpropagation through convolutional layer
-        # TODO: may need to correct, relu_derivative should be applied to activations before pooling, not directly to the flattened output
-        # ensures conv_output_grad correct represents the gradient for the convolutional layer
-        conv_output_grad = relu_derivative(conv_output)
+        # TODO: fix this it doesnt work
+        conv_output_grad = relu_derivative(conv_pre_flatten)
         kernels_grads = conv_weights_grad(input_img, self.kernels, conv_output_grad)
+
+        # Print gradient norms
+        for i, kernel in enumerate(self.kernels):
+            print(f"Kernel {i} gradient norm: {np.linalg.norm(kernels_grads[i])}")
 
         # apply gradient descent to kernels
         for i in range(len(self.kernels)):
@@ -136,10 +140,10 @@ class NeuralNetwork:
                     true_label = batch_labels[i]
 
                     # Forward pass
-                    probabilities, conv_output, hidden_outputs = self.forward_pass(input_img)
+                    probabilities, conv_output, conv_pre_flatten, hidden_outputs = self.forward_pass(input_img)
 
                     # Compute loss and update gradients
-                    loss = self.back_prop(input_img, probabilities, conv_output, hidden_outputs, true_label, learning_rate)
+                    loss = self.back_prop(input_img, probabilities, conv_output, conv_pre_flatten, hidden_outputs, true_label, learning_rate)
 
                     # Track loss and accuracy
                     epoch_loss += loss
@@ -149,7 +153,7 @@ class NeuralNetwork:
             # Print loss and accuracy for the epoch
             average_loss = epoch_loss / num_batches
             accuracy = correct_predictions / num_samples
-            print(f"Epoch {epoch+1}/{num_epochs}, Loss: {average_loss:.4f}, Accuracy: {accuracy:.4f}")
+            print(f"Epoch {epoch+1}/{num_epochs}, Loss: {average_loss:.4f}, Accuracy: {accuracy:.4f}, correct predictions: {correct_predictions} out of {num_samples} sampels")
 
 
 if __name__ == "__main__":
@@ -161,7 +165,7 @@ if __name__ == "__main__":
     test_images_gray = rgb2gray_weighted(test_images)
 
     nn = NeuralNetwork(
-        input_shape=train_images_gray[0].shape, num_kernels=2, kernel_size=3, pooling_kernel_size=3, stride=2, hidden_layer_sizes=[128, 64], num_classes=len(label_names)
+        input_shape=train_images_gray[0].shape, num_kernels=2, kernel_size=3, pooling_kernel_size=3, stride=1, hidden_layer_sizes=[128, 64], num_classes=len(label_names)
     )
 
     # Train the neural network
@@ -177,7 +181,7 @@ if __name__ == "__main__":
     import random
 
     pred_index = random.randint(0, 9999)
-    probabilities, _, _ = nn.forward_pass(test_images_gray[pred_index])
+    probabilities, _, _, _ = nn.forward_pass(test_images_gray[pred_index])
     predicted_label = np.argmax(probabilities)
     print(f"Predicted index: {pred_index}, predicted label: {label_names[predicted_label]}, actual label: {label_names[test_labels[pred_index]]}")
     print(f"Predicted probabilities: {probabilities}")
