@@ -89,32 +89,32 @@ def cross_entropy_loss_gradient(true_labels, predicted_probs, epsilon=1e-15):
     return loss, gradient
 
 
-def conv_weights_grad(input_img, kernels, grad_output):
-    """
-    Parameter:
-        input_img (np.array): The input image to the convolutional layer.
-        kernels (list of np.array): The kernels of the convolutional layer.
-        grad_output (list of np.array): Gradients of the output feature maps.
-
-    Returns:
-        list of np.array: The gradients of the kernels.
-    """
-    grads = []
-    # Iterate over each kernel and corresponding gradient
-    for i in range(len(kernels)):
-        kernel = kernels[i]
-        if grad_output.ndim == 1:
-            # Example: Reshape if grad_output was incorrectly flattened
-            height = width = int(np.sqrt(grad_output.size // len(kernels)))
-            grad_output = grad_output.reshape(height, width, len(kernels))
-        grad = grad_output[i]  # Extract the i-th channel gradient
-
-        # Initialize gradient for this kernel
-        kernel_grad = np.zeros_like(kernel)
-
-        # Convolve gradient with the input image
-        kernel_grad = convolve2d(input_img, grad, mode="valid")
-        grads.append(kernel_grad)
-    # Ensure that gradients have the same shape as kernels
-    grads = [np.resize(g, k.shape) for k, g in zip(kernels, grads)]
-    return grads
+# def conv_weights_grad(input_img, kernels, grad_output):
+#     """
+#     Parameter:
+#         input_img (np.array): The input image to the convolutional layer.
+#         kernels (list of np.array): The kernels of the convolutional layer.
+#         grad_output (list of np.array): Gradients of the output feature maps.
+#
+#     Returns:
+#         list of np.array: The gradients of the kernels.
+#     """
+#     grads = []
+#     # Iterate over each kernel and corresponding gradient
+#     for i in range(len(kernels)):
+#         kernel = kernels[i]
+#         if grad_output.ndim == 1:
+#             # Example: Reshape if grad_output was incorrectly flattened
+#             height = width = int(np.sqrt(grad_output.size // len(kernels)))
+#             grad_output = grad_output.reshape(height, width, len(kernels))
+#         grad = grad_output[i]  # Extract the i-th channel gradient
+#
+#         # Initialize gradient for this kernel
+#         kernel_grad = np.zeros_like(kernel)
+#
+#         # Convolve gradient with the input image
+#         kernel_grad = convolve2d(input_img, grad, mode="valid")
+#         grads.append(kernel_grad)
+#     # Ensure that gradients have the same shape as kernels
+#     grads = [np.resize(g, k.shape) for k, g in zip(kernels, grads)]
+#     return grads
