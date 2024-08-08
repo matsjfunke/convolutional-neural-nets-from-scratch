@@ -6,7 +6,7 @@ from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient,
 from scipy.signal import convolve2d
 
 
-class NeuralNetwork:
+class ConvolutionalNeuralNetwork:
     def __init__(self, input_shape, num_kernels, kernel_size, pooling_kernel_size, stride, hidden_layer_sizes, num_classes):
         """
         Constructor sets up the architecture of the neural network by initializing its parameters.
@@ -51,7 +51,15 @@ class NeuralNetwork:
         Save model parameters to a file.
         """
         with open(filename, "wb") as f:
-            pickle.dump({"kernels": self.kernels, "hidden_layers": self.hidden_layers, "output_weights": self.output_weights, "output_biases": self.output_biases}, f)
+            pickle.dump(
+                {
+                    "kernels": self.kernels,
+                    "hidden_layers": self.hidden_layers,
+                    "output_weights": self.output_weights,
+                    "output_biases": self.output_biases,
+                },
+                f,
+            )
 
     def load_params(self, filename):
         """
@@ -151,7 +159,7 @@ class NeuralNetwork:
             if i > 0:
                 next_layer_grad = np.dot(next_layer_grad, weights.T) * relu_derivative(self.hidden_outputs[i - 1])
 
-        # TODO: implement Backpropagation through convolutional layer, conv_relu_layer and pooling_layer
+        # TODO Backpropagation through pooling layer
 
         return loss
 
@@ -183,6 +191,9 @@ class NeuralNetwork:
                     # Forward pass
                     probabilities, _, _, _, _ = self.forward_pass(input_img)
 
+                    # Reset accumulated gradients
+                    self.kernels_grads = [np.zeros_like(kernel) for kernel in self.kernels]
+
                     # Compute loss and update gradients
                     loss = self.backward_pass(input_img, probabilities, true_label, learning_rate)
 
@@ -194,7 +205,9 @@ class NeuralNetwork:
             # Print loss and accuracy for the epoch
             average_loss = epoch_loss / num_batches
             accuracy = correct_predictions / num_samples
-            print(f"Epoch {epoch+1}/{num_epochs}, Loss: {average_loss:.4f}, Accuracy: {accuracy:.4f}, correct predictions: {correct_predictions} out of {num_samples} sampels")
+            print(
+                f"Epoch {epoch+1}/{num_epochs}, Loss: {average_loss:.4f}, Accuracy: {accuracy:.4f}, correct predictions: {correct_predictions} out of {num_samples} samples"
+            )
 
 
 if __name__ == "__main__":
@@ -208,8 +221,14 @@ if __name__ == "__main__":
     test_images_gray = rgb2gray_weighted(test_images)
 
     # Initialize the neural network
-    nn = NeuralNetwork(
-        input_shape=train_images_gray[0].shape, num_kernels=2, kernel_size=3, pooling_kernel_size=3, stride=1, hidden_layer_sizes=[128, 64], num_classes=len(label_names)
+    nn = ConvolutionalNeuralNetwork(
+        input_shape=train_images_gray[0].shape,
+        num_kernels=2,
+        kernel_size=3,
+        pooling_kernel_size=3,
+        stride=1,
+        hidden_layer_sizes=[128, 64],
+        num_classes=len(label_names),
     )
 
     # Train the neural network
