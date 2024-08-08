@@ -42,6 +42,36 @@ def calc_conv_output_size(input_size, kernel_size, pooling_kernel_size, stride, 
     return pooled_height * pooled_width * num_kernels
 
 
+def convolve2d(img, kernel):
+    """
+    Perform a 2D convolution operation between the input image and the kernel manually.
+    Mode: 'valid' (no padding, output size is reduced).
+    """
+    # Flip the kernel both horizontally and vertically
+    kernel = np.flipud(np.fliplr(kernel))
+
+    # Get the dimensions of the input image and kernel
+    img_height, img_width = img.shape
+    kernel_height, kernel_width = kernel.shape
+
+    # Calculate the dimensions of the output feature map
+    output_height = img_height - kernel_height + 1
+    output_width = img_width - kernel_width + 1
+
+    # Initialize the output feature map with zeros
+    output = np.zeros((output_height, output_width))
+
+    # Perform convolution
+    for i in range(output_height):
+        for j in range(output_width):
+            # Extract the current region of the image
+            region = img[i : i + kernel_height, j : j + kernel_width]
+            # Apply the kernel to the current region (element-wise multiplication and sum)
+            output[i, j] = np.sum(region * kernel)
+
+    return output
+
+
 def relu(x):
     return np.clip(np.maximum(0, x), 0, 1e10)  # Clip to avoid extreme values
 

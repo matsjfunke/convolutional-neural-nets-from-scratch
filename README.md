@@ -35,6 +35,11 @@ Advantages of using convolutions as input:
 
 ## Backpropagation in a Convolutional Layer
 
+**Key differences between backprop in a CNN and a traditional fully connected neural network are**:
+
+1. In a CNN, the gradients need to be backpropagated through the convolutional and pooling layers, which have unique properties compared to fully connected layers.
+2. The weight sharing in the convolutional layers means that the gradients need to be accumulated for each weight, as a single weight is used by multiple neurons in the layer.
+
 - How the CNN learns / updates its parameters: During backpropagation, the gradients of the loss function are propagated backward through the network, starting from the output layer.
 
 - Gradient Feature Map: Calculating how the error (or loss) changes with respect to each feature map. The gradients indicate how significantly each feature map or kernel contributes to the loss, guiding the updates to reduce the loss most effectively, telling us how the feature maps should be adjusted to minimize the loss.

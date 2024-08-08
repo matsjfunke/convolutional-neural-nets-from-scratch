@@ -1,10 +1,30 @@
 import unittest
 
 import numpy as np
-from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, relu_derivative, softmax
+from neural_net_utils import (
+    calc_conv_output_size,
+    convolve2d,
+    cross_entropy_loss_gradient,
+    init_weights_biases,
+    max_pooling,
+    relu,
+    relu_derivative,
+    softmax,
+)
 
 
 class TestNeuralNetUtils(unittest.TestCase):
+
+    def setUp(self):
+        """
+        Set up the test data.
+        """
+        self.input_img_array = np.array([[1, 2, 3, 0], [4, 5, 6, 1], [7, 8, 9, 2], [0, 1, 2, 3]])
+
+        self.kernels = [np.array([[1, 0], [0, -1]]), np.array([[0, 1], [-1, 0]])]
+
+        # Expected outputs based on provided values
+        self.expected_outputs = {0: np.array([[4, 4, -2], [4, 4, -4], [-6, -6, -6]]), 1: np.array([[2, 2, 6], [2, 2, 8], [-8, -8, 0]])}
 
     def test_init_weights_biases(self):
         num_inputs, num_outputs = 4, 3
@@ -12,6 +32,19 @@ class TestNeuralNetUtils(unittest.TestCase):
         self.assertEqual(weights.shape, (num_inputs, num_outputs))
         self.assertEqual(biases.shape, (num_outputs,))
         self.assertTrue(np.all(biases == 0))
+
+    def test_convolution(self):
+        """
+        Test that the manual convolution matches the expected outputs.
+        """
+        for idx, kernel in enumerate(self.kernels):
+            feature_maps_manual = convolve2d(self.input_img_array, kernel)
+            expected_output = self.expected_outputs[idx]
+            self.assertTrue(
+                np.allclose(feature_maps_manual, expected_output),
+                f"Manual convolution result for kernel {idx} does not match the expected output.\n"
+                f"Computed:\n{feature_maps_manual}\nExpected:\n{expected_output}",
+            )
 
     def test_max_pooling(self):
         feature_map = np.array([[1, 2, 3, 0], [4, 5, 6, 1], [7, 8, 9, 2], [0, 1, 2, 3]])

@@ -64,12 +64,12 @@ class TestConvolutionalNeuralNetwork(unittest.TestCase):
         self.assertEqual(pool_feature_maps[0].shape[1], (self.input_shape[1] - self.kernel_size) // self.stride - self.pooling_kernel_size + 2)
 
     def test_forward_pass(self):
-        probabilities, _, _, _, _ = self.nn.forward_pass(self.input_img)
+        probabilities = self.nn.forward_pass(self.input_img)
         self.assertEqual(probabilities.shape[0], self.num_classes)
         self.assertAlmostEqual(np.sum(probabilities), 1.0, delta=1e-6)  # Probabilities should sum to 1
 
     def test_backward_pass(self):
-        probabilities, _, _, _, _ = self.nn.forward_pass(self.input_img)
+        probabilities = self.nn.forward_pass(self.input_img)
         loss = self.nn.backward_pass(self.input_img, probabilities, self.true_label, learning_rate=self.learning_rate)
         self.assertIsInstance(loss, float)
 
@@ -96,7 +96,7 @@ class TestConvolutionalNeuralNetwork(unittest.TestCase):
                         true_label = batch_labels[i]
 
                         # Forward pass
-                        probabilities, _, _, _, _ = self.forward_pass(input_img)
+                        probabilities = self.forward_pass(input_img)
 
                         # Reset accumulated gradients
                         self.kernels_grads = [np.zeros_like(kernel) for kernel in self.kernels]

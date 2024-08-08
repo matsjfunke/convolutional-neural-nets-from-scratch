@@ -2,8 +2,16 @@ import pickle
 
 import numpy as np
 from cifar_10_utils import load_cifar10, rgb2gray_weighted
-from neural_net_utils import calc_conv_output_size, cross_entropy_loss_gradient, init_weights_biases, max_pooling, relu, relu_derivative, softmax
-from scipy.signal import convolve2d
+from neural_net_utils import (
+    calc_conv_output_size,
+    convolve2d,
+    cross_entropy_loss_gradient,
+    init_weights_biases,
+    max_pooling,
+    relu,
+    relu_derivative,
+    softmax,
+)
 
 
 class ConvolutionalNeuralNetwork:
@@ -46,37 +54,11 @@ class ConvolutionalNeuralNetwork:
         # Initialize weights and biases for output layer
         self.output_weights, self.output_biases = init_weights_biases(num_inputs=prev_size, num_outputs=num_classes)
 
-    def save_params(self, filename):
-        """
-        Save model parameters to a file.
-        """
-        with open(filename, "wb") as f:
-            pickle.dump(
-                {
-                    "kernels": self.kernels,
-                    "hidden_layers": self.hidden_layers,
-                    "output_weights": self.output_weights,
-                    "output_biases": self.output_biases,
-                },
-                f,
-            )
-
-    def load_params(self, filename):
-        """
-        Load the model parameters from a file.
-        """
-        with open(filename, "rb") as f:
-            params = pickle.load(f)
-            self.kernels = params["kernels"]
-            self.hidden_layers = params["hidden_layers"]
-            self.output_weights = params["output_weights"]
-            self.output_biases = params["output_biases"]
-
     def convolutional_layer(self, input_img_array):
         """
         Apply convolution to the input image with kernels to create feature_maps.
         """
-        feature_maps = [convolve2d(input_img_array, kernel, mode="valid") for kernel in self.kernels]
+        feature_maps = [convolve2d(input_img_array, kernel) for kernel in self.kernels]
         self.conv_feature_maps = feature_maps
         return feature_maps
 
@@ -126,7 +108,7 @@ class ConvolutionalNeuralNetwork:
 
         probabilities = self.softmax_output_layer(hidden_output)
 
-        return probabilities, self.conv_feature_maps, self.relu_feature_maps, self.pool_feature_maps, self.hidden_outputs
+        return probabilities
 
     def backward_pass(self, input_img, probabilities, true_label, learning_rate=0.001):
         """
@@ -189,7 +171,7 @@ class ConvolutionalNeuralNetwork:
                     true_label = batch_labels[i]
 
                     # Forward pass
-                    probabilities, _, _, _, _ = self.forward_pass(input_img)
+                    probabilities = self.forward_pass(input_img)
 
                     # Reset accumulated gradients
                     self.kernels_grads = [np.zeros_like(kernel) for kernel in self.kernels]
@@ -208,6 +190,32 @@ class ConvolutionalNeuralNetwork:
             print(
                 f"Epoch {epoch+1}/{num_epochs}, Loss: {average_loss:.4f}, Accuracy: {accuracy:.4f}, correct predictions: {correct_predictions} out of {num_samples} samples"
             )
+
+    def save_params(self, filename):
+        """
+        Save model parameters to a file.
+        """
+        with open(filename, "wb") as f:
+            pickle.dump(
+                {
+                    "kernels": self.kernels,
+                    "hidden_layers": self.hidden_layers,
+                    "output_weights": self.output_weights,
+                    "output_biases": self.output_biases,
+                },
+                f,
+            )
+
+    def load_params(self, filename):
+        """
+        Load the model parameters from a file.
+        """
+        with open(filename, "rb") as f:
+            params = pickle.load(f)
+            self.kernels = params["kernels"]
+            self.hidden_layers = params["hidden_layers"]
+            self.output_weights = params["output_weights"]
+            self.output_biases = params["output_biases"]
 
 
 if __name__ == "__main__":
@@ -232,7 +240,7 @@ if __name__ == "__main__":
     )
 
     # Train the neural network
-    nn.train(train_images_gray, train_labels, num_epochs=10, batch_size=32, learning_rate=0.01)
+    nn.train(train_images_gray[:3000], train_labels, num_epochs=10, batch_size=32, learning_rate=0.01)
 
     # Save the trained parameters
     nn.save_params("trained_model.pkl")
@@ -244,7 +252,7 @@ if __name__ == "__main__":
     import random
 
     pred_index = random.randint(0, len(test_images_gray) - 1)
-    probabilities, _, _, _ = nn.forward_pass(test_images_gray[pred_index])
+    probabilities = nn.forward_pass(test_images_gray[pred_index])
     predicted_label = np.argmax(probabilities)
     print(f"Predicted index: {pred_index}, predicted label: {label_names[predicted_label]}, actual label: {label_names[test_labels[pred_index]]}")
     print(f"Predicted probabilities: {probabilities}")
