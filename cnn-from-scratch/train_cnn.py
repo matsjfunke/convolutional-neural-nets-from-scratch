@@ -16,6 +16,12 @@ class NeuralNetwork:
         self.hidden_layer_sizes = hidden_layer_sizes
         self.num_classes = num_classes
 
+        # Initialize feature_maps & hidden layer outputs
+        self.conv_feature_maps = []
+        self.relu_feature_maps = []
+        self.pool_feature_maps = []
+        self.hidden_outputs = []
+
         # Initialize kernels for convolutional layer
         self.kernels = [np.random.randn(kernel_size, kernel_size) for _ in range(num_kernels)]
         self.kernels_grads = [np.zeros_like(kernel) for kernel in self.kernels]
@@ -48,17 +54,26 @@ class NeuralNetwork:
         feature_maps = []
         for kernel in self.kernels:
             feature_map = convolve2d(input_img_array, kernel, mode="valid")
-            # Apply relu for non-linearity
-            feature_map = relu(feature_map)
-            # Apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
-            feature_map = max_pooling(feature_map, self.pooling_kernel_size, self.stride)
             feature_maps.append(feature_map)
+        self.conv_feature_maps = feature_maps
+        return feature_maps
 
-        # Stack feature maps into a 3D tensor
-        output_tensor = np.stack(feature_maps, axis=-1)
-        # Flatten the output tensor to 1D
-        flattened_output = output_tensor.flatten()
-        return flattened_output, output_tensor
+    def conv_relu_layer(self):
+        # Apply relu for non-linearity
+        relu_feature_maps = []
+        for feature_map in self.conv_feature_maps:
+            relu_feature_map = relu(feature_map)
+            relu_feature_maps.append(relu_feature_map)
+        self.relu_feature_map = relu_feature_maps
+        return relu_feature_maps
+
+    def pooling_layer(self):
+        # Apply pooling (reducing dimensions of feature maps) to decrease computational complexity and retaining essential features.
+        pooling_feature_maps = []
+        for feature_map in self.relu_feature_maps:
+            feature_map = max_pooling(feature_map, self.pooling_kernel_size, self.stride)
+            pooling_feature_maps.append(feature_map)
+        self.pool_feature_map = pooling_feature_maps
 
     def hidden_layer(self, input, weights, biases):
         # Compute layer output (logits) & apply ReLU
@@ -69,18 +84,25 @@ class NeuralNetwork:
         return softmax(np.dot(hidden_layer_output, self.output_weights) + self.output_biases)
 
     def forward_pass(self, input_img):
-        conv_output, conv_pre_flatten = self.convolutional_layer(input_img)
+        self.convolutional_layer(input_img)
+        self.conv_relu_layer()
+        self.pooling_layer()
 
-        hidden_outputs = []
-        hidden_output = conv_output
+        # Stack feature maps into a 3D tensor
+        output_tensor = np.stack(self.pool_feature_map, axis=-1)
+        # Flatten the output tensor to 1D
+        flattened_output = output_tensor.flatten()
+
+        hidden_output = flattened_output
         for weights, biases in self.hidden_layers:
             hidden_output = self.hidden_layer(hidden_output, weights, biases)
-            hidden_outputs.append(hidden_output)
+            self.hidden_outputs.append(hidden_output)
 
         probabilities = self.softmax_output_layer(hidden_output)
-        return probabilities, conv_output, conv_pre_flatten, hidden_outputs
 
-    def back_prop(self, input_img, probabilities, conv_pre_flatten, conv_output, hidden_outputs, true_label, learning_rate=0.001):
+        return probabilities, self.conv_feature_maps, self.relu_feature_maps, self.pool_feature_maps, self.hidden_outputs
+
+    def back_prop(self, input_img, probabilities, conv_feature_maps, relu_feature_maps, pool_feature_maps, hidden_outputs, true_label, learning_rate=0.001):
         # Compute the loss and its gradient
         loss, output_loss_grad = cross_entropy_loss_gradient(true_label, probabilities)
 
@@ -108,14 +130,7 @@ class NeuralNetwork:
             if i > 0:
                 next_layer_grad = np.dot(next_layer_grad, weights.T) * relu_derivative(hidden_outputs[i - 1])
 
-        # Backpropagation through convolutional layer
-        # TODO: fix this it doesnt work
-        conv_output_grad = relu_derivative(conv_pre_flatten)
-        kernels_grads = conv_weights_grad(input_img, self.kernels, conv_output_grad)
-
-        # Print gradient norms
-        for i, kernel in enumerate(self.kernels):
-            print(f"Kernel {i} gradient norm: {np.linalg.norm(kernels_grads[i])}")
+        # TODO: implement Backpropagation through convolutional layer, conv_relu_layer and pooling_layer
 
         # apply gradient descent to kernels
         for i in range(len(self.kernels)):
@@ -140,10 +155,10 @@ class NeuralNetwork:
                     true_label = batch_labels[i]
 
                     # Forward pass
-                    probabilities, conv_output, conv_pre_flatten, hidden_outputs = self.forward_pass(input_img)
+                    probabilities, conv_output_tensor, hidden_outputs = self.forward_pass(input_img)
 
                     # Compute loss and update gradients
-                    loss = self.back_prop(input_img, probabilities, conv_output, conv_pre_flatten, hidden_outputs, true_label, learning_rate)
+                    loss = self.back_prop(input_img, probabilities, conv_output_tensor, hidden_outputs, true_label, learning_rate)
 
                     # Track loss and accuracy
                     epoch_loss += loss
